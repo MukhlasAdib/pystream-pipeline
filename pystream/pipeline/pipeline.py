@@ -121,10 +121,12 @@ class Pipeline:
         return self.pipeline.get_results().data
 
     def cleanup(self) -> None:
-        """Stop and cleanup the pipeline"""
+        """Stop and cleanup the pipeline. Do nothing if the pipeline has not
+        been initialized"""
         if self.pipeline is None:
-            raise PipelineUndefined("Pipeline has not been defined")
+            return
         self.pipeline.cleanup()
+        self.pipeline = None
 
     def __generate_pipeline_data(self, data: Any) -> PipelineData:
         """Handle whether to use input generator or given user data"""
