@@ -20,7 +20,8 @@
 
 - [ ] Output reading in parallel thread pipeline.
 - [ ] Option to use module global ThreadPoolExecutor for functional operation.
-- [ ] Add data argument to functional pipeline
+- [ ] Add data argument to functional pipeline.
+- [x] Pipeline is None after `Pipeline`'s `cleanup` method is called.
 
 ### v0.1.2
 
