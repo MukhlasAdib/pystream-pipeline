@@ -5,6 +5,7 @@ import time
 from typing import Any, Callable, List, Optional
 
 from pystream.data.pipeline_data import PipelineData
+from pystream.pipeline.pipeline_base import PipelineBase
 from pystream.stage.stage import StageCallable
 from .serial_pipeline import SerialPipeline
 from .parallel_pipeline import StagedThreadPipeline
@@ -26,7 +27,7 @@ class Pipeline:
 
     def __init__(self, input_generator: Optional[Callable[[], Any]] = None) -> None:
         self.stages_sequence: List[StageCallable] = []
-        self.pipeline = None
+        self.pipeline: Optional[PipelineBase] = None
         self.__input_generator: Callable[[], Any] = lambda: None
         if input_generator is not None:
             self.__input_generator = input_generator

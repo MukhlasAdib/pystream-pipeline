@@ -141,6 +141,10 @@ def staged_serial():
     print("Stopping pipeline...")
     # Stop the loop and cleanup the pipeline
     pipeline.stop_loop()
+    # Let's try read the last result
+    latest = pipeline.get_results()
+    print("Last output:")
+    print(latest)
     pipeline.cleanup()
 
 
@@ -154,6 +158,10 @@ def staged_parallel():
     time.sleep(ON_TIME)
     print("Stopping pipeline...")
     pipeline.stop_loop()
+    # Let's try read the last result
+    latest = pipeline.get_results()
+    print("Last output:")
+    print(latest)
     pipeline.cleanup()
 
 

@@ -131,13 +131,6 @@ class StagedThreadPipeline(PipelineBase):
         self,
         stages: List[StageCallable],
     ) -> None:
-        """The class that will handle the staged pipeline
-        based on multi threading.
-
-        Args:
-            stages (List[StageCallable]): The stages to be run
-                in sequence.
-        """
         self.stages = stages
 
         self.build_pipeline()
@@ -167,6 +160,7 @@ class StagedThreadPipeline(PipelineBase):
             self.stage_links.append(links)
             input_queue = output_queue
         # Replace output of the last stage to avoid blocking
+        self.stage_threads[-1].all_out = False
         self.stage_threads[-1].replace_output = True
         # The last stage's output is the input of the pipeline handler
         self.main_input_queue = input_queue
@@ -196,11 +190,6 @@ class StagedThreadPipeline(PipelineBase):
         return stat
 
     def get_results(self) -> PipelineData:
-        """Get output from the last stage
-
-        Returns:
-            PipelineData: the obtained data
-        """
         try:
             ret = self.main_input_queue.get(block=False)
         except Empty:
@@ -209,7 +198,6 @@ class StagedThreadPipeline(PipelineBase):
             return ret
 
     def cleanup(self) -> None:
-        """Cleanup the pipeline."""
         self.stopper.set()
         for proc in self.stage_threads:
             proc.join()
