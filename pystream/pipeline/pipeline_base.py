@@ -37,7 +37,7 @@ class PipelineBase(ABC):
         """Get output from the last stage
 
         Returns:
-            Optional[PipelineData]: the obtained data
+            PipelineData: the obtained data
         """
         pass
 

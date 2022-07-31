@@ -13,7 +13,9 @@ class PipelineTerminated(Exception):
     pass
 
 
-def send_output(data: PipelineData, output_queue: Queue, block: bool = True) -> bool:
+def send_output(
+    data: PipelineData, output_queue: Queue, block: bool = True, replace: bool = False
+) -> bool:
     """Send output to a pipeline queue.
 
     Args:
@@ -21,14 +23,22 @@ def send_output(data: PipelineData, output_queue: Queue, block: bool = True) -> 
         output_queue (Queue): target queue
         block (bool, optional): Whether to wait until the queue
             is empty (wait for 10 seconds). Defaults to True.
+        replace (bool, optional): If true, when the queue is full,
+            replace the data currently in the queue with the given
+            new data. Defaults to False.
 
     Returns:
-        bool: _description_
+        bool: True if the data is successfully sent to the output queue
     """
     try:
         output_queue.put(data, block=block, timeout=10)
     except Full:
-        return False
+        if replace:
+            output_queue.get(block=False)
+            output_queue.put(data, block=False)
+            return True
+        else:
+            return False
     else:
         return True
 
@@ -54,6 +64,7 @@ class StageThread(Thread):
         links: StageLinks,
         name: str = "Stage",
         all_out: bool = True,
+        replace_output: bool = False,
     ) -> None:
         """Thread class for the stage
 
@@ -64,6 +75,9 @@ class StageThread(Thread):
             all_out (bool, optional): Whether to operate in all out mode,
                 i.e. all data that comes in must be send to output.
                 Defaults to True.
+            replace_output (bool, optional): If true, when the queue is full,
+                replace the data currently in the queue with the new data.
+                Defaults to False.
         """
         super().__init__(name=name, daemon=True)
         self.stage = stage
@@ -71,6 +85,7 @@ class StageThread(Thread):
         self.all_out = all_out
         self.output_enabled = True
         self.daemon = True
+        self.replace_output = replace_output
 
     def run(self) -> None:
         self.start_thread()
@@ -89,7 +104,12 @@ class StageThread(Thread):
                 continue
             data.data = self.stage(data.data)
             if self.output_enabled:
-                send_output(data, self.links.output_queue, block=self.all_out)
+                send_output(
+                    data,
+                    self.links.output_queue,
+                    block=self.all_out,
+                    replace=self.replace_output,
+                )
         self.process_cleanup()
 
     def process_cleanup(self):
@@ -111,13 +131,6 @@ class StagedThreadPipeline(PipelineBase):
         self,
         stages: List[StageCallable],
     ) -> None:
-        """The class that will handle the staged pipeline
-        based on multi  threading.
-
-        Args:
-            stages (List[StageCallable]): The stages to be run
-                in sequence.
-        """
         self.stages = stages
 
         self.build_pipeline()
@@ -146,9 +159,9 @@ class StagedThreadPipeline(PipelineBase):
             self.stage_threads.append(StageThread(stage, links, f"PyStream-Stage"))
             self.stage_links.append(links)
             input_queue = output_queue
-        # The last stage will not send output to avoid blocking
-        # TODO: Handle output of pipeline without blocking
-        self.stage_threads[-1].output_enabled = False
+        # Replace output of the last stage to avoid blocking
+        self.stage_threads[-1].all_out = False
+        self.stage_threads[-1].replace_output = True
         # The last stage's output is the input of the pipeline handler
         self.main_input_queue = input_queue
 
@@ -177,11 +190,6 @@ class StagedThreadPipeline(PipelineBase):
         return stat
 
     def get_results(self) -> PipelineData:
-        """Get output from the last stage
-
-        Returns:
-            PipelineData: the obtained data
-        """
         try:
             ret = self.main_input_queue.get(block=False)
         except Empty:
@@ -190,7 +198,6 @@ class StagedThreadPipeline(PipelineBase):
             return ret
 
     def cleanup(self) -> None:
-        """Cleanup the pipeline."""
         self.stopper.set()
         for proc in self.stage_threads:
             proc.join()

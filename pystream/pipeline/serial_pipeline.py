@@ -19,8 +19,10 @@ class SerialPipeline(PipelineBase):
         self.results = data
         return True
 
-    def get_results(self) -> Any:
-        return self.results.data
+    def get_results(self) -> PipelineData:
+        ret = self.results
+        self.results = PipelineData()
+        return ret
 
     def cleanup(self) -> None:
         for stage in self.pipeline:
