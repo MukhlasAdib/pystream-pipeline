@@ -116,7 +116,17 @@ class Pipeline:
         self.__loop_thread.join()
 
     def get_results(self) -> Any:
-        """Get latest results from the pipeline"""
+        """Get latest results from the pipeline
+
+        Raises:
+            PipelineUndefined: raised if method `serialize` and
+                `parallelize` has not been invoked.
+
+        Returns:
+            Any: the last data from the pipeline. The same data cannot be
+                read twice. If the new data is not available, None is
+                returned.
+        """
         if self.pipeline is None:
             raise PipelineUndefined("Pipeline has not been defined")
         return self.pipeline.get_results().data
