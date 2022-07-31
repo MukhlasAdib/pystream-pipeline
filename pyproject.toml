@@ -1,0 +1,40 @@
+[tool.poetry]
+name = "pystream-pipeline"
+version = "0.1.0"
+description = "Python package to create and manage fast parallelized data processing pipeline for real-time application"
+authors = ["Mukhlas Adib <adib.rasyidy@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/MukhlasAdib/pystream-pipeline"
+repository = "https://github.com/MukhlasAdib/pystream-pipeline"
+documentation = "https://pystream-pipeline.readthedocs.io/"
+keywords = ["data-pipeline", "parallelization", "data-processing", "performance", "real-time"]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities"
+]
+packages = [
+    { include = "pystream" },
+]
+include = [
+    "LICENSE.md",
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+black = "^22.3.0"
+docutils = "^0.17.1"
+numpy = "^1.22.0"
+opencv-python = "^4.5.5"
+Sphinx = "^5.0.2"
+sphinx-rtd-theme = "^1.0.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
