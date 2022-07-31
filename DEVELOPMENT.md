@@ -18,10 +18,11 @@
 
 ### v0.1.1
 
-- [ ] Output reading in parallel thread pipeline.
+- [x] Output reading in parallel thread pipeline.
 - [ ] Option to use module global ThreadPoolExecutor for functional operation.
 - [ ] Add data argument to functional pipeline.
 - [x] Pipeline is None after `Pipeline`'s `cleanup` method is called.
+- [x] Serial pipeline data become None if it has been read once.
 
 ### v0.1.2
 
