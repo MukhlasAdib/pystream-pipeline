@@ -2,17 +2,26 @@ from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from typing import Any, Callable, List
 
 
+_default_executor = ThreadPoolExecutor(max_workers=10)
+
+
 def func_parallel_thread(
-    funcs: List[Callable[[], Any]], max_workers: int = 5
+    funcs: List[Callable[[], Any]], executor: ThreadPoolExecutor = _default_executor
 ) -> Callable[[], Any]:
     """Create a function made of functions that are executed in parallel
     using ThreadPoolExecutor from concurrent module.
+
+    If no executor is provided, a shared default ThreadPoolExecutor is used. This
+    executor will not be killed by shutdown method. Therefore, make sure that the
+    functions passed here can exit properly. To be safe, please pass your own executor.
 
     Args:
         funcs (List[Callable[[], Any]]): the list of functions
             to be executed. It is assumed that all of the arguments
             and output variables are already contained in each function.
-        max_workers (int, optional): Maximum threads to be made. Defaults to 5.
+        executor (ThreadPoolExecutor, optional): ThreadPoolExecutor instance from
+            concurrent.futures that handles the threads. By default, executor
+            managed by this package will be used.
 
     Returns:
         Callable[[], Any]: The returned function to execute the serial
@@ -20,8 +29,8 @@ def func_parallel_thread(
     """
 
     def wrapper():
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            executor.map(lambda func: func(), funcs)
+        res = executor.map(lambda func: func(), funcs)
+        [r for r in res]
 
     return wrapper
 
