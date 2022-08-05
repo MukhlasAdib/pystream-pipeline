@@ -20,7 +20,7 @@
 
 - [x] Output reading in parallel thread pipeline.
 - [x] Option to use module global ThreadPoolExecutor for functional operation.
-- [ ] Add data argument to functional pipeline.
+- [x] Add data argument to functional pipeline.
 - [x] Pipeline is None after `Pipeline`'s `cleanup` method is called.
 - [x] Serial pipeline data become None if it has been read once.
 
