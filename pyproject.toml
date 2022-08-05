@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pystream-pipeline"
-version = "0.1.0"
+version = "0.1.1"
 description = "Python package to create and manage fast parallelized data processing pipeline for real-time application"
 authors = ["Mukhlas Adib <adib.rasyidy@gmail.com>"]
 license = "MIT"

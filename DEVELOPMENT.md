@@ -2,6 +2,14 @@
 
 ## Released
 
+### v0.1.1
+
+- [x] Output reading in parallel thread pipeline.
+- [x] Option to use module global ThreadPoolExecutor for functional operation.
+- [x] Add data argument to functional pipeline.
+- [x] Pipeline is None after `Pipeline`'s `cleanup` method is called.
+- [x] Serial pipeline data become None if it has been read once.
+
 ### v0.1.0
 
 - [x] Poetry initialization
@@ -15,14 +23,6 @@
   - [x] Documentation in `docs` about basic API.
 
 ## On-going
-
-### v0.1.1
-
-- [x] Output reading in parallel thread pipeline.
-- [x] Option to use module global ThreadPoolExecutor for functional operation.
-- [x] Add data argument to functional pipeline.
-- [x] Pipeline is None after `Pipeline`'s `cleanup` method is called.
-- [x] Serial pipeline data become None if it has been read once.
 
 ### v0.1.2
 
