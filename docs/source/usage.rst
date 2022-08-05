@@ -135,17 +135,17 @@ Functional Pipeline
 
 Using functional pipeline is simple.
 You only need to define the stage callables and pass it to the functional pipeline tools that PyStream has.
-However, it is important to note that the passed functions cannot take any argument (at least for now).
-If you want to pass external data, you can use persistent data type and embed it into your function.
+It is important to note that the passed functions only take one data argument.
+If you want to pass more external data, you can use persistent data type and embed it into your function partially.
 
 For example, to get the same pipeline as the previous example, the function will be as follow::
 
-    data = {"data": 0}
     wait_time = 1
-    def dummy_stage():
+    def dummy_stage(data):
         time.sleep(wait_time)
         print(data["data"])
         data["data"] += 1
+        return data
 
 To make a serial pipeline, you can use ``pystream.functional.func_serial``::
 
@@ -188,4 +188,7 @@ When it has been finished, you will get that ``data["data"]`` is now ``6``.
 
 To run the pipeline, just call the pipeline function::
 
-    pipeline_combined()
+    data = {"data": 0}
+    ret = pipeline_combined(data)
+
+and you will get the final modified `data` in `ret`.

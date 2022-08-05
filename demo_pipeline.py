@@ -165,24 +165,21 @@ def staged_parallel():
     pipeline.cleanup()
 
 
-def get_functional_pipeline(data: MyData) -> List[Callable[[], Any]]:
+def get_functional_pipeline() -> List[Callable[[Any], Any]]:
     """Get the pipeline in functional form. Because the data will be wrapped
     with the stages as partial functions, we might need to build the pipeline
-    at each execution to ensure independency between each execution.
-
-    Args:
-        data (MyData): data to be injected
+    at each execution to ensure independency between each execution, if needed.
 
     Returns:
-        List[Callable[[], Any]]: pipleine constructor, a list of stage callables
+        List[Callable[[Any], Any]]: pipleine constructor, a list of stage callables
     """
     # Make the stages, and then wrap the stage and the data as a partial function
-    func_stage1 = functools.partial(DummyStage("Stage1"), data)
-    func_stage2 = functools.partial(DummyStage("Stage2"), data)
-    func_stage3 = functools.partial(DummyStage("Stage3"), data)
-    func_stage4 = functools.partial(DummyStage("Stage4"), data)
-    func_stage5 = functools.partial(DummyStage("Stage5", measure=True), data)
-    func_output = functools.partial(last_stage, data)
+    func_stage1 = DummyStage("Stage1")
+    func_stage2 = DummyStage("Stage2")
+    func_stage3 = DummyStage("Stage3")
+    func_stage4 = DummyStage("Stage4")
+    func_stage5 = DummyStage("Stage5", measure=True)
+    func_output = last_stage
     return [
         func_stage1,
         func_stage2,
@@ -197,9 +194,9 @@ def functional_serial():
     print("Starting pipeline in functional serial mode...")
     for _ in range(10):
         data = {"start": time.time()}
-        stages = get_functional_pipeline(data)
+        stages = get_functional_pipeline()
         func_pipeline = func_serial(stages)
-        func_pipeline()
+        func_pipeline(data)
         time.sleep(INPUT_PERIOD)
 
 
@@ -207,10 +204,10 @@ def functional_thread():
     print("Starting pipeline in functional parallel thread mode...")
     for _ in range(10):
         data = {"start": time.time()}
-        stages = get_functional_pipeline(data)
+        stages = get_functional_pipeline()
         func_pipeline_no_output = func_parallel_thread(stages[:-1])
         func_pipeline = func_serial([func_pipeline_no_output, stages[-1]])
-        func_pipeline()
+        func_pipeline(data)
         time.sleep(INPUT_PERIOD)
 
 
