@@ -36,7 +36,7 @@ def func_parallel_thread(
     """
 
     def wrapper(x: Any) -> Any:
-        """Wrapped parallel threader pipeline function
+        """Wrapped parallel threaded pipeline function
 
         Args:
             x (Any): input data
@@ -92,6 +92,14 @@ def func_serial(funcs: List[Callable[[Any], Any]]) -> Callable[[Any], Any]:
     """
 
     def wrapper(x: Any) -> Any:
+        """Wrapped serialized pipeline function
+
+        Args:
+            x (Any): input data
+
+        Returns:
+            Any: output data
+        """
         for func in funcs:
             x = func(x)
         return x
