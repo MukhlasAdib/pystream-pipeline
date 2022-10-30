@@ -66,15 +66,26 @@ class Pipeline:
         self.pipeline = SerialPipeline(self.stages_sequence)
         return self
 
-    def parallelize(self) -> Pipeline:
+    def parallelize(
+        self, block_input: bool = True, input_timeout: float = 10
+    ) -> Pipeline:
         """Turn the pipeline into independent stage pipeline. Each stage
         will live in different thread and work asynchronously. However,
         the data will be passed to the stages in the same order as defined
 
+        Args:
+            block_input (bool, optional): Whether to set the forward method
+                into blocking mode with the specified timeout in input_timeout.
+                Defaults to True.
+            input_timeout (float, optional): Blocking timeout for the forward
+                method. Defaults to 10.
+
         Returns:
             Pipeline: this pipeline itself
         """
-        self.pipeline = StagedThreadPipeline(self.stages_sequence)
+        self.pipeline = StagedThreadPipeline(
+            self.stages_sequence, block_input=block_input, input_timeout=input_timeout
+        )
         return self
 
     def forward(self, data: Any) -> bool:

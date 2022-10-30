@@ -14,7 +14,11 @@ class PipelineTerminated(Exception):
 
 
 def send_output(
-    data: PipelineData, output_queue: Queue, block: bool = True, replace: bool = False
+    data: PipelineData,
+    output_queue: Queue,
+    block: bool = True,
+    replace: bool = False,
+    timeout: float = 10,
 ) -> bool:
     """Send output to a pipeline queue.
 
@@ -23,15 +27,18 @@ def send_output(
         output_queue (Queue): target queue
         block (bool, optional): Whether to wait until the queue
             is empty (wait for 10 seconds). Defaults to True.
-        replace (bool, optional): If true, when the queue is full,
-            replace the data currently in the queue with the given
-            new data. Defaults to False.
+        replace (bool, optional): If true, when the queue is full
+            (after the specified timeout if block is True), replace
+            the data currently in the queue with the given new data.
+            Defaults to False.
+        timeout (float, optional): Waiting timeout to put data into
+            the queue. Defaults to 10.
 
     Returns:
         bool: True if the data is successfully sent to the output queue
     """
     try:
-        output_queue.put(data, block=block, timeout=10)
+        output_queue.put(data, block=block, timeout=timeout)
     except Full:
         if replace:
             output_queue.get(block=False)
@@ -130,8 +137,24 @@ class StagedThreadPipeline(PipelineBase):
     def __init__(
         self,
         stages: List[StageCallable],
+        block_input: bool = True,
+        input_timeout: float = 10,
     ) -> None:
+        """The class that will handle the parallel pipeline
+        based on multi-threading.
+
+        Args:
+            stages (List[StageCallable]): The stages to be run
+                in sequence.
+            block_input (bool, optional): Whether to set the forward method
+                into blocking mode with the specified timeout in input_timeout.
+                Defaults to True.
+            input_timeout (float, optional): Blocking timeout for the forward
+                method. Defaults to 10.
+        """
         self.stages = stages
+        self.block_input = block_input
+        self.input_timeout = input_timeout
 
         self.build_pipeline()
         self.run_pipeline()
@@ -186,7 +209,12 @@ class StagedThreadPipeline(PipelineBase):
         """
         if self.stopper.is_set():
             raise PipelineTerminated("The pipeline has been terminated")
-        stat = send_output(data_input, self.main_output_queue, block=False)
+        stat = send_output(
+            data_input,
+            self.main_output_queue,
+            block=self.block_input,
+            timeout=self.input_timeout,
+        )
         return stat
 
     def get_results(self) -> PipelineData:
