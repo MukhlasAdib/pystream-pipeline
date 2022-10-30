@@ -44,4 +44,4 @@ API of PyStream can be found in this project [documentation](https://pystream-pi
 You can also access some examples:
 
 - See [`dummy_pipeline.py`](demo_pipeline.py) to see how PyStream can be used to build a dummy pipeline.
-- See how PyStream is used to increase the throughput of a vehicle environment mapping problem in [this repository](https://github.com/MukhlasAdib/KITTI_Mapping/tree/main/app).
+- See how PyStream is used to increase the throughput of a vehicle environment mapping system in [this repository](https://github.com/MukhlasAdib/KITTI_Mapping/tree/main/app).
