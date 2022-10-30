@@ -26,11 +26,16 @@
 
 ### v0.1.2
 
-- [ ] Well explained sample usage of the demo in `.ipynb` format.
+- [x] Option to use blocking pipeline input for parallel pipeline.
+- [x] An application example: [KITTI mapping](https://github.com/MukhlasAdib/KITTI_Mapping).
+
+### v0.1.3
+
+- [ ] Well-explained sample usage of the demo in `.ipynb` format.
 - [ ] Unit tests for staged pipeline operations.
 - [ ] Unit tests for functional pipeline operations.
 
-### v0.1.3
+### v0.1.4
 
 - [ ] Interface unification of serial and parallel pipeline stages by adding a wrapper for the stages.
 - [ ] Unification of serial and parallel stage links in staged mode.

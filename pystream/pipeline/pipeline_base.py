@@ -11,8 +11,7 @@ class PipelineBase(ABC):
         self,
         stages: List[StageCallable],
     ) -> None:
-        """The class that will handle the pipeline
-        based on multi  threading.
+        """The class that will handle the pipeline.
 
         Args:
             stages (List[StageCallable]): The stages to be run
