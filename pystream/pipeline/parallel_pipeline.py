@@ -32,7 +32,7 @@ def send_output(
             the data currently in the queue with the given new data.
             Defaults to False.
         timeout (float, optional): Waiting timeout to put data into
-            the queue. Defaults to 10.
+            the queue in seconds. Defaults to 10.
 
     Returns:
         bool: True if the data is successfully sent to the output queue
@@ -150,7 +150,7 @@ class StagedThreadPipeline(PipelineBase):
                 into blocking mode with the specified timeout in input_timeout.
                 Defaults to True.
             input_timeout (float, optional): Blocking timeout for the forward
-                method. Defaults to 10.
+                method in seconds. Defaults to 10.
         """
         self.stages = stages
         self.block_input = block_input

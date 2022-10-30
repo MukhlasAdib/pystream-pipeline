@@ -78,7 +78,7 @@ class Pipeline:
                 into blocking mode with the specified timeout in input_timeout.
                 Defaults to True.
             input_timeout (float, optional): Blocking timeout for the forward
-                method. Defaults to 10.
+                method in seconds. Defaults to 10.
 
         Returns:
             Pipeline: this pipeline itself
