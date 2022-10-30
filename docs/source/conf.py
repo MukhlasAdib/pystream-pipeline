@@ -23,7 +23,7 @@ copyright = "2022, Mukhlas Adib"
 author = "Mukhlas Adib"
 
 # The full version, including alpha/beta/rc tags
-release = "v0.1.1"
+release = "v0.1.2"
 
 
 # -- General configuration ---------------------------------------------------

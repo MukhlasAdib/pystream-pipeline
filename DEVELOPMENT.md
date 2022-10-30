@@ -2,6 +2,11 @@
 
 ## Released
 
+### v0.1.2
+
+- [x] Option to use blocking pipeline input for parallel pipeline.
+- [x] An application example: [KITTI mapping](https://github.com/MukhlasAdib/KITTI_Mapping).
+
 ### v0.1.1
 
 - [x] Output reading in parallel thread pipeline.
@@ -23,11 +28,6 @@
   - [x] Documentation in `docs` about basic API.
 
 ## On-going
-
-### v0.1.2
-
-- [x] Option to use blocking pipeline input for parallel pipeline.
-- [x] An application example: [KITTI mapping](https://github.com/MukhlasAdib/KITTI_Mapping).
 
 ### v0.1.3
 
