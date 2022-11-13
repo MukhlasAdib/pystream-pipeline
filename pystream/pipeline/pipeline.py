@@ -7,8 +7,8 @@ from typing import Any, Callable, List, Optional
 from pystream.data.pipeline_data import PipelineData
 from pystream.pipeline.pipeline_base import PipelineBase
 from pystream.stage.stage import StageCallable
-from .serial_pipeline import SerialPipeline
-from .parallel_pipeline import StagedThreadPipeline
+from pystream.pipeline.serial_pipeline import SerialPipeline
+from pystream.pipeline.parallel_pipeline import StagedThreadPipeline
 
 
 class PipelineUndefined(Exception):
@@ -28,14 +28,14 @@ class Pipeline:
     def __init__(self, input_generator: Optional[Callable[[], Any]] = None) -> None:
         self.stages_sequence: List[StageCallable] = []
         self.pipeline: Optional[PipelineBase] = None
-        self.__input_generator: Callable[[], Any] = lambda: None
+        self._input_generator: Callable[[], Any] = lambda: None
         if input_generator is not None:
-            self.__input_generator = input_generator
+            self._input_generator = input_generator
 
-        self.__loop_period = 0.01
-        self.__loop_is_start = Event()
-        self.__loop_thread = Thread(
-            target=self.__loop_handler, name="PyStream-InputGen", daemon=True
+        self._loop_period = 0.01
+        self._loop_is_start = Event()
+        self._loop_thread = Thread(
+            target=self._loop_handler, name="PyStream-InputGen", daemon=True
         )
 
     def add(self, stage: StageCallable) -> None:
@@ -105,7 +105,7 @@ class Pipeline:
         """
         if self.pipeline is None:
             raise PipelineUndefined("Pipeline has not been defined")
-        pipeline_data = self.__generate_pipeline_data(data)
+        pipeline_data = self._generate_pipeline_data(data)
         return self.pipeline.forward(pipeline_data)
 
     def start_loop(self, period: float = 0.01) -> None:
@@ -117,14 +117,14 @@ class Pipeline:
             period (float, optional): Period to push the data.
                 Defaults to 0.01.
         """
-        self.__loop_period = period
-        self.__loop_is_start.set()
-        self.__loop_thread.start()
+        self._loop_period = period
+        self._loop_is_start.set()
+        self._loop_thread.start()
 
     def stop_loop(self) -> None:
         """Stop the autonomous operation of the pipeline"""
-        self.__loop_is_start.clear()
-        self.__loop_thread.join()
+        self._loop_is_start.clear()
+        self._loop_thread.join()
 
     def get_results(self) -> Any:
         """Get latest results from the pipeline
@@ -150,22 +150,22 @@ class Pipeline:
         self.pipeline.cleanup()
         self.pipeline = None
 
-    def __generate_pipeline_data(self, data: Any) -> PipelineData:
+    def _generate_pipeline_data(self, data: Any) -> PipelineData:
         """Handle whether to use input generator or given user data"""
         if data is None:
-            return PipelineData(data=self.__input_generator())
+            return PipelineData(data=self._input_generator())
         else:
             return PipelineData(data=data)
 
-    def __loop_handler(self) -> None:
+    def _loop_handler(self) -> None:
         """Function to be run by the input generator thread"""
         if self.pipeline is None:
             raise PipelineUndefined("Pipeline has not been defined")
-        self.__loop_is_start.wait()
-        check_period = max(0.001, self.__loop_period / 10)
-        while self.__loop_is_start.is_set():
+        self._loop_is_start.wait()
+        check_period = max(0.001, self._loop_period / 10)
+        while self._loop_is_start.is_set():
             last_update = time.time()
-            data = self.__generate_pipeline_data(None)
+            data = self._generate_pipeline_data(None)
             self.pipeline.forward(data)
-            while time.time() - last_update < self.__loop_period:
+            while time.time() - last_update < self._loop_period:
                 time.sleep(check_period)
