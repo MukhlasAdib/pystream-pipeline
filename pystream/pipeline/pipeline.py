@@ -81,7 +81,7 @@ class Pipeline:
         )
         return self
 
-    def forward(self, data: Any) -> bool:
+    def forward(self, data: Any = _request_generator) -> bool:
         """Forward data into the pipeline
 
         Args:

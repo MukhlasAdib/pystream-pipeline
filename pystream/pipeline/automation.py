@@ -5,13 +5,14 @@ from threading import Event, Thread
 
 from pystream.data.pipeline_data import PipelineData
 from pystream.general.errors import PipelineUndefined
+from pystream.pipeline.pipeline import _request_generator
 
 
 class InterfacePipelineProtocol(Protocol):
-    def forward(self, data: Any) -> bool:
+    def forward(self, data: Any = _request_generator) -> bool:
         ...
 
-    def _generate_pipeline_data(self, data: Any = None) -> PipelineData:
+    def _generate_pipeline_data(self, data: Any = _request_generator) -> PipelineData:
         ...
 
 
