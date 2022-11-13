@@ -3,7 +3,7 @@ from typing import Any, Protocol
 
 from threading import Event, Thread
 
-from pystream.data.pipeline_data import PipelineData
+from pystream.data.pipeline_data import PipelineData, _request_generator
 from pystream.general.errors import PipelineUndefined
 from pystream.pipeline.pipeline import _request_generator
 

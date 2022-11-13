@@ -9,3 +9,6 @@ class PipelineData:
 
 class InputGeneratorRequest:
     pass
+
+
+_request_generator = InputGeneratorRequest()

@@ -1,16 +1,17 @@
 from __future__ import annotations
 from typing import Any, Callable, List, Optional
 
-from pystream.data.pipeline_data import InputGeneratorRequest, PipelineData
+from pystream.data.pipeline_data import (
+    InputGeneratorRequest,
+    PipelineData,
+    _request_generator,
+)
 from pystream.general.errors import PipelineUndefined
 from pystream.pipeline.automation import PipelineAutomation
 from pystream.pipeline.pipeline_base import PipelineBase
 from pystream.stage.stage import StageCallable
 from pystream.pipeline.serial_pipeline import SerialPipeline
 from pystream.pipeline.parallel_pipeline import StagedThreadPipeline
-
-
-_request_generator = InputGeneratorRequest()
 
 
 class Pipeline:

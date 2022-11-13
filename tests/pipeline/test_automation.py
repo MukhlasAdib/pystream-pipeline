@@ -12,7 +12,7 @@ class MockInterfacePipeline:
         self.data_hist = []
         self.data_count = 0
 
-    def forward(self, data):
+    def forward(self, data=PipelineData(None)):
         self.times.append(time.time())
         self.data_hist.append(data.data)
         return True
@@ -23,9 +23,13 @@ class MockInterfacePipeline:
 
 
 class TestPipelineAutomation:
-    period = 0.5
-    mock_inteface_pipeline = MockInterfacePipeline()
-    automation = PipelineAutomation(pipeline=mock_inteface_pipeline, period=period)
+    @pytest.fixture(autouse=True)
+    def _create_automation(self):
+        self.period = 0.5
+        self.mock_inteface_pipeline = MockInterfacePipeline()
+        self.automation = PipelineAutomation(
+            pipeline=self.mock_inteface_pipeline, period=self.period
+        )
 
     def test_init(self):
         assert self.automation.pipeline == self.mock_inteface_pipeline
