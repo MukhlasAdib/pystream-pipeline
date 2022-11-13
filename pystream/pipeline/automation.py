@@ -1,13 +1,22 @@
 import time
+from typing import Any, Protocol
 
 from threading import Event, Thread
 
+from pystream.data.pipeline_data import PipelineData
 from pystream.general.errors import PipelineUndefined
-from pystream.pipeline.pipeline import Pipeline
+
+
+class InterfacePipelineProtocol(Protocol):
+    def forward(self, data: Any) -> bool:
+        ...
+
+    def _generate_pipeline_data(self, data: Any = None) -> PipelineData:
+        ...
 
 
 class PipelineAutomation(Thread):
-    def __init__(self, pipeline: Pipeline, period: float) -> None:
+    def __init__(self, pipeline: InterfacePipelineProtocol, period: float) -> None:
         self.pipeline = pipeline
         self._loop_period = period
         self._loop_is_start = Event()
@@ -28,7 +37,7 @@ class PipelineAutomation(Thread):
         if self.pipeline is None:
             raise PipelineUndefined("Pipeline has not been defined")
         self._loop_is_start.wait()
-        check_period = max(0.001, self._loop_period / 10)
+        check_period = max(0.001, self._loop_period / 15)
         while self._loop_is_start.is_set():
             last_update = time.time()
             data = self.pipeline._generate_pipeline_data()
