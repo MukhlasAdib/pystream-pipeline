@@ -6,9 +6,9 @@ from pystream import Stage
 
 
 class DummyStage(Stage):
-    def __init__(self):
-        self.val = None
-        self.wait = 0.5
+    def __init__(self, val=None, wait=0.5):
+        self.val = val
+        self.wait = wait
 
     def __call__(self, data: list) -> list:
         time.sleep(self.wait)

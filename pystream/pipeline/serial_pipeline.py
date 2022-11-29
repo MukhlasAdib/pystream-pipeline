@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import List
 
 from pystream.data.pipeline_data import PipelineData
 from pystream.stage.stage import Stage, StageCallable
