@@ -1,3 +1,5 @@
+import time
+
 import pytest
 
 from pystream import Pipeline
@@ -15,7 +17,7 @@ class MockPipeline(PipelineBase):
 
     def forward(self, data_input):
         self.last_data = data_input
-        return self.last_data
+        return True
 
     def get_results(self):
         return self.last_data
@@ -24,8 +26,17 @@ class MockPipeline(PipelineBase):
         self.active = False
 
 
+INPUT_GENERATOR_OUTPUT = "input_generated"
+
+
+def mock_input_generator():
+    return INPUT_GENERATOR_OUTPUT
+
+
 class TestPipeline:
-    pipeline = Pipeline()
+    @pytest.fixture(autouse=True)
+    def _create_pipeline(self):
+        self.pipeline = Pipeline(mock_input_generator)
 
     def test_add(self, dummy_stage):
         assert len(self.pipeline.stages_sequence) == 0
@@ -50,9 +61,17 @@ class TestPipeline:
     def test_forward(self):
         self.pipeline.pipeline = MockPipeline()
         new_data = "dummy"
-        self.pipeline.forward(new_data)
+        ret = self.pipeline.forward(new_data)
+        assert ret == True
         assert isinstance(self.pipeline.pipeline.last_data, PipelineData)
         assert self.pipeline.pipeline.last_data.data == new_data
+
+    def test_forward_generator(self):
+        self.pipeline.pipeline = MockPipeline()
+        ret = self.pipeline.forward()
+        assert ret == True
+        assert isinstance(self.pipeline.pipeline.last_data, PipelineData)
+        assert self.pipeline.pipeline.last_data.data == INPUT_GENERATOR_OUTPUT
 
     def test_forward_exception(self):
         new_data = "dummy"
@@ -79,3 +98,20 @@ class TestPipeline:
         self.pipeline.cleanup()
         assert mock_pipeline.active == False
         assert self.pipeline.pipeline is None
+
+    def test_loop(self):
+        self.pipeline.start_loop()
+        assert self.pipeline._automation is not None
+        assert self.pipeline._automation._loop_is_start.is_set()
+        time.sleep(0.5)
+        self.pipeline.stop_loop()
+        assert not self.pipeline._automation._loop_is_start.is_set()
+
+    def test_generate_pipeline_data(self):
+        ret = self.pipeline._generate_pipeline_data()
+        assert isinstance(ret, PipelineData)
+        assert ret.data == INPUT_GENERATOR_OUTPUT
+        new_data = "from_user"
+        ret = self.pipeline._generate_pipeline_data(new_data)
+        assert isinstance(ret, PipelineData)
+        assert ret.data == new_data

@@ -1,18 +1,17 @@
 from __future__ import annotations
-
-from threading import Event, Thread
-import time
 from typing import Any, Callable, List, Optional
 
-from pystream.data.pipeline_data import PipelineData
+from pystream.data.pipeline_data import (
+    InputGeneratorRequest,
+    PipelineData,
+    _request_generator,
+)
+from pystream.general.errors import PipelineUndefined
+from pystream.pipeline.automation import PipelineAutomation
 from pystream.pipeline.pipeline_base import PipelineBase
 from pystream.stage.stage import StageCallable
 from pystream.pipeline.serial_pipeline import SerialPipeline
 from pystream.pipeline.parallel_pipeline import StagedThreadPipeline
-
-
-class PipelineUndefined(Exception):
-    pass
 
 
 class Pipeline:
@@ -31,12 +30,7 @@ class Pipeline:
         self._input_generator: Callable[[], Any] = lambda: None
         if input_generator is not None:
             self._input_generator = input_generator
-
-        self._loop_period = 0.01
-        self._loop_is_start = Event()
-        self._loop_thread = Thread(
-            target=self._loop_handler, name="PyStream-InputGen", daemon=True
-        )
+        self._automation = None
 
     def add(self, stage: StageCallable) -> None:
         """Add a stage into the pipeline
@@ -88,7 +82,7 @@ class Pipeline:
         )
         return self
 
-    def forward(self, data: Any) -> bool:
+    def forward(self, data: Any = _request_generator) -> bool:
         """Forward data into the pipeline
 
         Args:
@@ -117,14 +111,14 @@ class Pipeline:
             period (float, optional): Period to push the data.
                 Defaults to 0.01.
         """
-        self._loop_period = period
-        self._loop_is_start.set()
-        self._loop_thread.start()
+        self._automation = PipelineAutomation(pipeline=self, period=period)
+        self._automation.start()
 
     def stop_loop(self) -> None:
         """Stop the autonomous operation of the pipeline"""
-        self._loop_is_start.clear()
-        self._loop_thread.join()
+        if self._automation is None:
+            return
+        self._automation.stop()
 
     def get_results(self) -> Any:
         """Get latest results from the pipeline
@@ -150,22 +144,9 @@ class Pipeline:
         self.pipeline.cleanup()
         self.pipeline = None
 
-    def _generate_pipeline_data(self, data: Any) -> PipelineData:
+    def _generate_pipeline_data(self, data: Any = _request_generator) -> PipelineData:
         """Handle whether to use input generator or given user data"""
-        if data is None:
+        if isinstance(data, InputGeneratorRequest):
             return PipelineData(data=self._input_generator())
         else:
             return PipelineData(data=data)
-
-    def _loop_handler(self) -> None:
-        """Function to be run by the input generator thread"""
-        if self.pipeline is None:
-            raise PipelineUndefined("Pipeline has not been defined")
-        self._loop_is_start.wait()
-        check_period = max(0.001, self._loop_period / 10)
-        while self._loop_is_start.is_set():
-            last_update = time.time()
-            data = self._generate_pipeline_data(None)
-            self.pipeline.forward(data)
-            while time.time() - last_update < self._loop_period:
-                time.sleep(check_period)

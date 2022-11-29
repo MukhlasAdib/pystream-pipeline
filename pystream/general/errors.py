@@ -1,0 +1,2 @@
+class PipelineUndefined(Exception):
+    pass
