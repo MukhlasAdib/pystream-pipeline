@@ -5,7 +5,13 @@ import time
 import pytest
 
 from pystream.data.pipeline_data import PipelineData
-from pystream.pipeline.parallel_pipeline import StageLinks, StageThread, send_output
+from pystream.general.errors import PipelineTerminated
+from pystream.pipeline.parallel_pipeline import (
+    StageLinks,
+    StagedThreadPipeline,
+    StageThread,
+    send_output,
+)
 
 
 def test_send_output():
@@ -105,3 +111,40 @@ class TestStageThread:
         self.stage_thread.process_cleanup()
         assert self.stopper.is_set()
         assert self.stage.val is None
+
+
+class TestStagedThreadPipeline:
+    @pytest.fixture(autouse=True)
+    def _create_pipeline(self, dummy_stage):
+        self.num_stages = 5
+        self.stages = []
+        for i in range(self.num_stages):
+            self.stages.append(dummy_stage(val=i, wait=0.5))
+        self.pipeline = StagedThreadPipeline(self.stages)
+
+    def test_init(self):
+        assert len(self.pipeline.stage_threads) == self.num_stages
+        assert len(self.pipeline.stage_links) == self.num_stages
+        for stage_thread in self.pipeline.stage_threads:
+            assert stage_thread.links.starter.is_set()
+            assert stage_thread.is_alive()
+
+    def test_forward_and_get_results(self):
+        assert self.pipeline.get_results().data is None
+        self.pipeline.forward(PipelineData(data=[]))
+        time.sleep(3)
+        res = self.pipeline.get_results()
+        assert res.data == list(range(self.num_stages))
+
+    def test_cleanup(self):
+        self.pipeline.cleanup()
+        for stage_thread in self.pipeline.stage_threads:
+            assert stage_thread.links.stopper.is_set()
+            assert not stage_thread.is_alive()
+        for stage in self.stages:
+            assert stage.val is None
+
+    def test_forward_terminated(self):
+        self.pipeline.cleanup()
+        with pytest.raises(PipelineTerminated):
+            self.pipeline.forward(PipelineData(data=[]))

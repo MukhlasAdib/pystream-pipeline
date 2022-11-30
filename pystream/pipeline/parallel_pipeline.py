@@ -5,12 +5,9 @@ import time
 from typing import List
 
 from pystream.data.pipeline_data import PipelineData
+from pystream.general.errors import PipelineTerminated
 from pystream.pipeline.pipeline_base import PipelineBase
 from pystream.stage.stage import Stage, StageCallable
-
-
-class PipelineTerminated(Exception):
-    pass
 
 
 def send_output(
