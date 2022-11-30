@@ -5,12 +5,9 @@ import time
 from typing import List
 
 from pystream.data.pipeline_data import PipelineData
+from pystream.general.errors import PipelineTerminated
 from pystream.pipeline.pipeline_base import PipelineBase
 from pystream.stage.stage import Stage, StageCallable
-
-
-class PipelineTerminated(Exception):
-    pass
 
 
 def send_output(
@@ -93,6 +90,7 @@ class StageThread(Thread):
         self.output_enabled = True
         self.daemon = True
         self.replace_output = replace_output
+        self.send_output_timeout = 10
 
     def run(self) -> None:
         self.start_thread()
@@ -116,6 +114,7 @@ class StageThread(Thread):
                     self.links.output_queue,
                     block=self.all_out,
                     replace=self.replace_output,
+                    timeout=self.send_output_timeout,
                 )
         self.process_cleanup()
 
