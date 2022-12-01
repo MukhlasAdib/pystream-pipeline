@@ -1,1 +1,1 @@
-from pystream.functional.functions import *
+from pystream.functional.functions import func_parallel_thread, func_serial

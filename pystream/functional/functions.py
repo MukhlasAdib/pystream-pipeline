@@ -1,4 +1,4 @@
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Callable, List
 
 
@@ -47,30 +47,6 @@ def func_parallel_thread(
         res = executor.map(lambda func: func(x), funcs)
         [r for r in res]
         return x
-
-    return wrapper
-
-
-def func_parallel_process(
-    funcs: List[Callable[[], Any]], max_workers: int = 5
-) -> Callable[[], Any]:
-    """CURRENTLY UNSTABLE.
-    Create a function made of functions that are executed in parallel
-    using ProcessPoolExecutor from concurrent module.
-
-    Args:
-        funcs (List[Callable[[], Any]]): the list of functions
-            to be executed. It is assumed that all of the arguments
-            and output variables are already contained in each function.
-
-    Returns:
-        Callable[[], Any]: The returned function to execute the serial
-        functions.
-    """
-
-    def wrapper():
-        with ProcessPoolExecutor(max_workers=max_workers) as executor:
-            executor.map(lambda func: func(), funcs)
 
     return wrapper
 
