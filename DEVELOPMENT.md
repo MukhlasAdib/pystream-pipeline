@@ -35,7 +35,7 @@
 - [x] `forward` method of `pystream.Pipeline` have default value: the flag to use input generator
 - [ ] Well-explained sample usage of the demo in `.ipynb` format.
 - [x] Unit tests for staged pipeline operations.
-- [ ] Unit tests for functional pipeline operations.
+- [x] Unit tests for functional pipeline operations.
 
 ### v0.1.4
 
