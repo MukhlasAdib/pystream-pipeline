@@ -7,3 +7,4 @@ def test_version():
 
 def test_import():
     from pystream import Stage, Pipeline
+    from pystream.functional import func_parallel_thread, func_serial
