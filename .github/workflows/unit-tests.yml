@@ -1,9 +1,6 @@
 name: unit-tests
 
-on:
-  pull_request_target:
-    branches:
-      - "main"
+on: [push]
 
 jobs:
   build:
