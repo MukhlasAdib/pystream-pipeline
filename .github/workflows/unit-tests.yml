@@ -3,7 +3,7 @@ name: unit-tests
 on: [push]
 
 jobs:
-  build:
+  unit-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -22,3 +22,5 @@ jobs:
           poetry-version: ${{ matrix.poetry-version }}
       - name: Install dependencies
         run: poetry install --no-root
+      - name: Unit tests
+        run: pytest tests
