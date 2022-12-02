@@ -73,7 +73,7 @@ class TestStageThread:
 
     def test_init_and_start(self):
         self.stage_thread.start()
-        time.sleep(0.1)
+        time.sleep(0.5)
         assert self.starter.is_set()
 
     def test_forward_data_blocking(self):

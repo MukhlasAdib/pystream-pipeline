@@ -100,6 +100,7 @@ class TestPipeline:
         assert self.pipeline.pipeline is None
 
     def test_loop(self):
+        self.pipeline.serialize()
         self.pipeline.start_loop()
         assert self.pipeline._automation is not None
         assert self.pipeline._automation._loop_is_start.is_set()

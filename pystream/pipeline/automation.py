@@ -26,6 +26,8 @@ class PipelineAutomation(Thread):
         )
 
     def start(self):
+        if self.pipeline is None:
+            raise PipelineUndefined("Pipeline has not been defined")
         self._loop_is_start.set()
         self._loop_thread.start()
 
@@ -35,8 +37,6 @@ class PipelineAutomation(Thread):
 
     def _loop_handler(self) -> None:
         """Function to be run by the input generator thread"""
-        if self.pipeline is None:
-            raise PipelineUndefined("Pipeline has not been defined")
         self._loop_is_start.wait()
         check_period = max(0.001, self._loop_period / 15)
         while self._loop_is_start.is_set():
