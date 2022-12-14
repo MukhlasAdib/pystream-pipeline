@@ -1,10 +1,17 @@
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any, Dict
+
+
+@dataclass
+class ProfileData:
+    started: Dict[str, float] = {}
+    latencies: Dict[str, float] = {}
 
 
 @dataclass
 class PipelineData:
-    data: Optional[Any] = None
+    data: Any = None
+    profile: ProfileData = ProfileData()
 
 
 class InputGeneratorRequest:
