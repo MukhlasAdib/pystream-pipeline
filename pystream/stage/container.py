@@ -25,7 +25,7 @@ class StageContainer(Stage):
 
     def __call__(self, data: PipelineData) -> PipelineData:
         start_measurement(self.name, data.profile)
-        data = self.stage(data)
+        data.data = self.stage(data.data)
         end_measurement(self.name, data.profile)
         return data
 

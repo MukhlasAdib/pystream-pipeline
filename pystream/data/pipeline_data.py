@@ -1,11 +1,11 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Dict
 
 
 @dataclass
 class ProfileData:
-    started: Dict[str, float] = {}
-    latencies: Dict[str, float] = {}
+    started: Dict[str, float] = field(default_factory=dict)
+    latencies: Dict[str, float] = field(default_factory=dict)
 
 
 @dataclass

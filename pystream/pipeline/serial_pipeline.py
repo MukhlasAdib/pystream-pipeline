@@ -1,8 +1,9 @@
 from typing import List
 
 from pystream.data.pipeline_data import PipelineData
+from pystream.stage.container import StageContainer
 from pystream.stage.stage import Stage, StageCallable
-from .pipeline_base import PipelineBase
+from pystream.pipeline.pipeline_base import PipelineBase
 
 
 class SerialPipeline(PipelineBase):
@@ -10,12 +11,12 @@ class SerialPipeline(PipelineBase):
         self,
         stages: List[StageCallable],
     ) -> None:
-        self.pipeline = stages
+        self.pipeline = [StageContainer(stage) for stage in stages]
         self.results = PipelineData()
 
     def forward(self, data: PipelineData) -> bool:
         for stage in self.pipeline:
-            data.data = stage(data.data)
+            data = stage(data)
         self.results = data
         return True
 
