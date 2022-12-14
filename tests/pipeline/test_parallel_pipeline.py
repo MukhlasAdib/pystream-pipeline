@@ -12,6 +12,7 @@ from pystream.pipeline.parallel_pipeline import (
     StageThread,
     send_output,
 )
+from pystream.stage.container import StageContainer
 
 
 def test_send_output():
@@ -68,7 +69,7 @@ class TestStageThread:
             stopper=self.stopper,
             starter=self.starter,
         )
-        self.stage = dummy_stage(val="stage", wait=0.1)
+        self.stage = StageContainer(dummy_stage(val="stage", wait=0.1))
         self.stage_thread = StageThread(self.stage, self.link)
 
     def test_init_and_start(self):
@@ -110,7 +111,7 @@ class TestStageThread:
         time.sleep(0.1)
         self.stage_thread.process_cleanup()
         assert self.stopper.is_set()
-        assert self.stage.val is None
+        assert self.stage.stage.val is None  # type: ignore
 
 
 class TestStagedThreadPipeline:
