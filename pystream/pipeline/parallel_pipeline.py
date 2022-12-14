@@ -7,6 +7,7 @@ from typing import List
 from pystream.data.pipeline_data import PipelineData
 from pystream.general.errors import PipelineTerminated
 from pystream.pipeline.pipeline_base import PipelineBase
+from pystream.stage.container import StageContainer
 from pystream.stage.stage import Stage, StageCallable
 
 
@@ -107,7 +108,7 @@ class StageThread(Thread):
                 data: PipelineData = self.links.input_queue.get(timeout=1)
             except Empty:
                 continue
-            data.data = self.stage(data.data)
+            data = self.stage(data)
             if self.output_enabled:
                 send_output(
                     data,
@@ -151,7 +152,7 @@ class StagedThreadPipeline(PipelineBase):
             input_timeout (float, optional): Blocking timeout for the forward
                 method in seconds. Defaults to 10.
         """
-        self.stages = stages
+        self.stages = [StageContainer(stage) for stage in stages]
         self.block_input = block_input
         self.input_timeout = input_timeout
 
@@ -178,7 +179,7 @@ class StagedThreadPipeline(PipelineBase):
                 stopper=self.stopper,
                 starter=self.starter,
             )
-            self.stage_threads.append(StageThread(stage, links, f"PyStream-Stage"))
+            self.stage_threads.append(StageThread(stage, links, stage.name))
             self.stage_links.append(links)
             input_queue = output_queue
         # Replace output of the last stage to avoid blocking
