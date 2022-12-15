@@ -2,13 +2,15 @@ from dataclasses import dataclass
 from queue import Empty, Full, Queue
 from threading import Event, get_ident, Thread
 import time
-from typing import List
+from typing import List, Optional
 
 from pystream.data.pipeline_data import PipelineData
 from pystream.general.errors import PipelineTerminated
 from pystream.pipeline.pipeline_base import PipelineBase
 from pystream.stage.container import StageContainer
+from pystream.stage.final_stage import FinalStage
 from pystream.stage.stage import Stage, StageCallable
+from pystream.utils.profiler import ProfilerHandler
 
 
 def send_output(
@@ -139,6 +141,7 @@ class StagedThreadPipeline(PipelineBase):
         stages: List[StageCallable],
         block_input: bool = True,
         input_timeout: float = 10,
+        profiler_handler: Optional[ProfilerHandler] = None,
     ) -> None:
         """The class that will handle the parallel pipeline
         based on multi-threading.
@@ -152,7 +155,9 @@ class StagedThreadPipeline(PipelineBase):
             input_timeout (float, optional): Blocking timeout for the forward
                 method in seconds. Defaults to 10.
         """
-        self.stages = [StageContainer(stage) for stage in stages]
+        self.final_stage = FinalStage(profiler_handler)
+        self.stages: List[Stage] = [StageContainer(stage) for stage in stages]
+        self.stages.append(self.final_stage)
         self.block_input = block_input
         self.input_timeout = input_timeout
 

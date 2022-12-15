@@ -12,6 +12,7 @@ from pystream.pipeline.pipeline_base import PipelineBase
 from pystream.stage.stage import StageCallable
 from pystream.pipeline.serial_pipeline import SerialPipeline
 from pystream.pipeline.parallel_pipeline import StagedThreadPipeline
+from pystream.utils.profiler import ProfilerHandler
 
 
 class Pipeline:
@@ -24,12 +25,22 @@ class Pipeline:
             Defaults to None.
     """
 
-    def __init__(self, input_generator: Optional[Callable[[], Any]] = None) -> None:
+    def __init__(
+        self,
+        input_generator: Optional[Callable[[], Any]] = None,
+        use_profiler: bool = False,
+    ) -> None:
         self.stages_sequence: List[StageCallable] = []
         self.pipeline: Optional[PipelineBase] = None
+
         self._input_generator: Callable[[], Any] = lambda: None
         if input_generator is not None:
             self._input_generator = input_generator
+
+        self.profiler = None
+        if use_profiler:
+            self.profiler = ProfilerHandler()
+
         self._automation = None
 
     def add(self, stage: StageCallable) -> None:
@@ -57,7 +68,9 @@ class Pipeline:
         Returns:
             Pipeline: this pipeline itself
         """
-        self.pipeline = SerialPipeline(self.stages_sequence)
+        self.pipeline = SerialPipeline(
+            self.stages_sequence, profiler_handler=self.profiler
+        )
         return self
 
     def parallelize(
@@ -78,7 +91,10 @@ class Pipeline:
             Pipeline: this pipeline itself
         """
         self.pipeline = StagedThreadPipeline(
-            self.stages_sequence, block_input=block_input, input_timeout=input_timeout
+            self.stages_sequence,
+            block_input=block_input,
+            input_timeout=input_timeout,
+            profiler_handler=self.profiler,
         )
         return self
 

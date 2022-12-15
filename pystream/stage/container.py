@@ -20,7 +20,7 @@ class StageContainer(Stage):
     def __init__(self, stage: StageCallable, name: Optional[str] = None) -> None:
         if name is None:
             name = get_default_stage_name()
-        self.name = name
+        self._name = name
         self.stage = stage
 
     def __call__(self, data: PipelineData) -> PipelineData:
@@ -31,3 +31,7 @@ class StageContainer(Stage):
 
     def cleanup(self) -> None:
         self.stage.cleanup()
+
+    @property
+    def name(self) -> str:
+        return self._name

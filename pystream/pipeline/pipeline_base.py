@@ -1,24 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import List
 
-from pystream.stage.stage import StageCallable
 from pystream.data.pipeline_data import PipelineData
 
 
 class PipelineBase(ABC):
-    @abstractmethod
-    def __init__(
-        self,
-        stages: List[StageCallable],
-    ) -> None:
-        """The class that will handle the pipeline.
-
-        Args:
-            stages (List[StageCallable]): The stages to be run
-                in sequence.
-        """
-        pass
-
     @abstractmethod
     def forward(self, data_input: PipelineData) -> bool:
         """Send data to be processed by pipeline
