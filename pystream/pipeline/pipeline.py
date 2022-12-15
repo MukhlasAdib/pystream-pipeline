@@ -6,12 +6,12 @@ from pystream.data.pipeline_data import (
     PipelineData,
     _request_generator,
 )
-from pystream.general.errors import PipelineUndefined
 from pystream.pipeline.automation import PipelineAutomation
 from pystream.pipeline.pipeline_base import PipelineBase
 from pystream.stage.stage import StageCallable
 from pystream.pipeline.serial_pipeline import SerialPipeline
 from pystream.pipeline.parallel_pipeline import StagedThreadPipeline
+from pystream.utils.errors import PipelineUndefined
 from pystream.utils.profiler import ProfilerHandler
 
 

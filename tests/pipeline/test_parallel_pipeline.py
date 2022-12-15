@@ -5,7 +5,6 @@ import time
 import pytest
 
 from pystream.data.pipeline_data import PipelineData
-from pystream.general.errors import PipelineTerminated
 from pystream.pipeline.parallel_pipeline import (
     StageLinks,
     StagedThreadPipeline,
@@ -13,6 +12,7 @@ from pystream.pipeline.parallel_pipeline import (
     send_output,
 )
 from pystream.stage.container import StageContainer
+from pystream.utils.errors import PipelineTerminated
 
 
 def test_send_output():

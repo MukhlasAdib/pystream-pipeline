@@ -5,11 +5,11 @@ import time
 from typing import List, Optional
 
 from pystream.data.pipeline_data import PipelineData
-from pystream.general.errors import PipelineTerminated
 from pystream.pipeline.pipeline_base import PipelineBase
 from pystream.stage.container import StageContainer
 from pystream.stage.final_stage import FinalStage
 from pystream.stage.stage import Stage, StageCallable
+from pystream.utils.errors import PipelineTerminated
 from pystream.utils.profiler import ProfilerHandler
 
 
