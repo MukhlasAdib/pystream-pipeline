@@ -155,10 +155,9 @@ class Pipeline:
     def cleanup(self) -> None:
         """Stop and cleanup the pipeline. Do nothing if the pipeline has not
         been initialized"""
-        if self.pipeline is None:
-            return
-        self.pipeline.cleanup()
-        self.pipeline = None
+        if self.pipeline is not None:
+            self.pipeline.cleanup()
+            self.pipeline = None
 
         if self.profiler is not None:
             self.profiler.cleanup()
