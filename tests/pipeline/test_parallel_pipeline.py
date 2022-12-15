@@ -124,8 +124,8 @@ class TestStagedThreadPipeline:
         self.pipeline = StagedThreadPipeline(self.stages)
 
     def test_init(self):
-        assert len(self.pipeline.stage_threads) == self.num_stages
-        assert len(self.pipeline.stage_links) == self.num_stages
+        assert len(self.pipeline.stage_threads) == self.num_stages + 1
+        assert len(self.pipeline.stage_links) == self.num_stages + 1
         for stage_thread in self.pipeline.stage_threads:
             assert stage_thread.links.starter.is_set()
             assert stage_thread.is_alive()
