@@ -160,6 +160,9 @@ class Pipeline:
         self.pipeline.cleanup()
         self.pipeline = None
 
+        if self.profiler is not None:
+            self.profiler.cleanup()
+
     def _generate_pipeline_data(self, data: Any = _request_generator) -> PipelineData:
         """Handle whether to use input generator or given user data"""
         if isinstance(data, InputGeneratorRequest):
