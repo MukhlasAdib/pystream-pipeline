@@ -3,7 +3,7 @@ import os
 import sqlite3
 from typing import Dict
 
-from pystream import _PYSTREAM_DIR
+from pystream.utils.general import _PYSTREAM_DIR
 from pystream.data.pipeline_data import ProfileData
 
 
