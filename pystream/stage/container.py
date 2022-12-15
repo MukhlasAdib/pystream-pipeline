@@ -1,7 +1,7 @@
+import time
 from typing import Optional, TypeVar
 
 from pystream.data.pipeline_data import PipelineData
-from pystream.stage.profiler import end_measurement, start_measurement
 from pystream.stage.stage import Stage, StageCallable
 
 T = TypeVar("T")
@@ -24,9 +24,9 @@ class StageContainer(Stage):
         self.stage = stage
 
     def __call__(self, data: PipelineData) -> PipelineData:
-        start_measurement(self.name, data.profile)
+        data.profile.started[self.name] = time.perf_counter()
         data.data = self.stage(data.data)
-        end_measurement(self.name, data.profile)
+        data.profile.started[self.name] = time.perf_counter()
         return data
 
     def cleanup(self) -> None:

@@ -5,7 +5,7 @@ from typing import Any, Dict
 @dataclass
 class ProfileData:
     started: Dict[str, float] = field(default_factory=dict)
-    latencies: Dict[str, float] = field(default_factory=dict)
+    ended: Dict[str, float] = field(default_factory=dict)
 
 
 @dataclass
