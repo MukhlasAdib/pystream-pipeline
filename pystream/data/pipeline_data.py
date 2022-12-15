@@ -1,10 +1,17 @@
-from dataclasses import dataclass
-from typing import Any, Optional
+from dataclasses import dataclass, field
+from typing import Any, Dict
+
+
+@dataclass
+class ProfileData:
+    started: Dict[str, float] = field(default_factory=dict)
+    ended: Dict[str, float] = field(default_factory=dict)
 
 
 @dataclass
 class PipelineData:
-    data: Optional[Any] = None
+    data: Any = None
+    profile: ProfileData = ProfileData()
 
 
 class InputGeneratorRequest:

@@ -5,13 +5,14 @@ import time
 import pytest
 
 from pystream.data.pipeline_data import PipelineData
-from pystream.general.errors import PipelineTerminated
 from pystream.pipeline.parallel_pipeline import (
     StageLinks,
     StagedThreadPipeline,
     StageThread,
     send_output,
 )
+from pystream.stage.container import StageContainer
+from pystream.utils.errors import PipelineTerminated
 
 
 def test_send_output():
@@ -68,7 +69,7 @@ class TestStageThread:
             stopper=self.stopper,
             starter=self.starter,
         )
-        self.stage = dummy_stage(val="stage", wait=0.1)
+        self.stage = StageContainer(dummy_stage(val="stage", wait=0.1))
         self.stage_thread = StageThread(self.stage, self.link)
 
     def test_init_and_start(self):
@@ -110,7 +111,7 @@ class TestStageThread:
         time.sleep(0.1)
         self.stage_thread.process_cleanup()
         assert self.stopper.is_set()
-        assert self.stage.val is None
+        assert self.stage.stage.val is None  # type: ignore
 
 
 class TestStagedThreadPipeline:
@@ -123,8 +124,8 @@ class TestStagedThreadPipeline:
         self.pipeline = StagedThreadPipeline(self.stages)
 
     def test_init(self):
-        assert len(self.pipeline.stage_threads) == self.num_stages
-        assert len(self.pipeline.stage_links) == self.num_stages
+        assert len(self.pipeline.stage_threads) == self.num_stages + 1
+        assert len(self.pipeline.stage_links) == self.num_stages + 1
         for stage_thread in self.pipeline.stage_threads:
             assert stage_thread.links.starter.is_set()
             assert stage_thread.is_alive()
