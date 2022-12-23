@@ -1,7 +1,9 @@
-from dataclasses import replace
-import os
 import sqlite3
-from typing import Dict
+from dataclasses import replace
+from typing import Dict, Literal, Tuple
+
+import os
+import pandas as pd
 
 from pystream.utils.general import _PYSTREAM_DIR
 from pystream.data.pipeline_data import ProfileData
@@ -62,6 +64,29 @@ class ProfileDBHandler:
         cur.execute(self._ADD_COLUMN_QUERY.format(self.throughput_table, column_name))
         self.column_names.append(column_name)
 
+    def _summarize_table(
+        self, table_name: str, stat: Literal["mean", "median"]
+    ) -> Dict[str, float]:
+        table_df = pd.read_sql_query(
+            f"SELECT * FROM {table_name}", self.conn, dtype=float
+        )
+        columns = table_df.columns[1:]
+        if stat == "median":
+            summary = table_df.median().to_numpy()[1:]
+        else:
+            summary = table_df.mean().to_numpy()[1:]
+        out = {}
+        for col, val in zip(columns, summary):
+            out[col] = val
+        return out
+
+    def summarize(
+        self, stat: Literal["mean", "median"] = "mean"
+    ) -> Tuple[Dict[str, float], Dict[str, float]]:
+        latency = self._summarize_table(self.latency_table, stat)
+        throughput = self._summarize_table(self.throughput_table, stat)
+        return latency, throughput
+
     def close(self) -> None:
         self.conn.close()
 
@@ -104,6 +129,11 @@ class ProfilerHandler:
                     data.ended[stage] - self.previous_data.started[stage]
                 )
         return throughput
+
+    def summarize(self):
+        latency, throughput = self.db_handler.summarize()
+        print(latency)
+        print(throughput)
 
     def cleanup(self):
         self.db_handler.close()
