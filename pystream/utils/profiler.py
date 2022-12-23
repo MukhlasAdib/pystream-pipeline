@@ -54,9 +54,9 @@ class ProfileDBHandler:
                 self._add_new_column(col)
 
         columns = ",".join(data.keys())
-        values = ",".join(data.keys())
+        values = ",".join([str(v) for v in data.values()])
         cur = self.conn.cursor()
-        cur.execute(self._ADD_COLUMN_QUERY.format(table_name, columns, values))
+        cur.execute(self._PUT_DATA_QUERY.format(table_name, columns, values))
 
     def _add_new_column(self, column_name: str) -> None:
         cur = self.conn.cursor()
@@ -70,13 +70,13 @@ class ProfileDBHandler:
         table_df = pd.read_sql_query(
             f"SELECT * FROM {table_name}", self.conn, dtype=float
         )
-        columns = table_df.columns[1:]
         if stat == "median":
-            summary = table_df.median().to_numpy()[1:]
+            summary = table_df.median()
         else:
-            summary = table_df.mean().to_numpy()[1:]
+            summary = table_df.mean()
+        summary = summary[1:]
         out = {}
-        for col, val in zip(columns, summary):
+        for col, val in zip(summary.index, summary):
             out[col] = val
         return out
 
@@ -100,7 +100,13 @@ class ProfilerHandler:
         self.throughput_history = []
         self.is_first = True
 
-        db_path = os.path.join(_PYSTREAM_DIR, "user_data", "last_profiles.db")
+        self.db_folder = "user_data"
+        self.db_filename = "last_profiles.sqlite"
+        os.makedirs(os.path.join(_PYSTREAM_DIR, self.db_folder), exist_ok=True)
+
+        db_path = os.path.join(_PYSTREAM_DIR, self.db_folder, self.db_filename)
+        if os.path.isfile(db_path):
+            os.remove(db_path)
         self.db_handler = ProfileDBHandler(db_path)
 
     def process_data(self, data: ProfileData) -> None:
@@ -125,9 +131,7 @@ class ProfilerHandler:
         throughput = {}
         for stage in data.ended.keys():
             if stage in self.previous_data.ended:
-                throughput[stage] = (
-                    data.ended[stage] - self.previous_data.started[stage]
-                )
+                throughput[stage] = data.ended[stage] - self.previous_data.ended[stage]
         return throughput
 
     def summarize(self):
