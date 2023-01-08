@@ -1,7 +1,9 @@
-from dataclasses import replace
-import os
 import sqlite3
-from typing import Dict
+from dataclasses import replace
+from typing import Dict, Literal, Tuple
+
+import os
+import pandas as pd
 
 from pystream.utils.general import _PYSTREAM_DIR
 from pystream.data.pipeline_data import ProfileData
@@ -52,15 +54,38 @@ class ProfileDBHandler:
                 self._add_new_column(col)
 
         columns = ",".join(data.keys())
-        values = ",".join(data.keys())
+        values = ",".join([str(v) for v in data.values()])
         cur = self.conn.cursor()
-        cur.execute(self._ADD_COLUMN_QUERY.format(table_name, columns, values))
+        cur.execute(self._PUT_DATA_QUERY.format(table_name, columns, values))
 
     def _add_new_column(self, column_name: str) -> None:
         cur = self.conn.cursor()
         cur.execute(self._ADD_COLUMN_QUERY.format(self.latency_table, column_name))
         cur.execute(self._ADD_COLUMN_QUERY.format(self.throughput_table, column_name))
         self.column_names.append(column_name)
+
+    def _summarize_table(
+        self, table_name: str, stat: Literal["mean", "median"]
+    ) -> Dict[str, float]:
+        table_df = pd.read_sql_query(
+            f"SELECT * FROM {table_name}", self.conn, dtype=float
+        )
+        if stat == "median":
+            summary = table_df.median()
+        else:
+            summary = table_df.mean()
+        summary = summary[1:]
+        out = {}
+        for col, val in zip(summary.index, summary):
+            out[col] = val
+        return out
+
+    def summarize(
+        self, stat: Literal["mean", "median"] = "mean"
+    ) -> Tuple[Dict[str, float], Dict[str, float]]:
+        latency = self._summarize_table(self.latency_table, stat)
+        throughput = self._summarize_table(self.throughput_table, stat)
+        return latency, throughput
 
     def close(self) -> None:
         self.conn.close()
@@ -75,7 +100,13 @@ class ProfilerHandler:
         self.throughput_history = []
         self.is_first = True
 
-        db_path = os.path.join(_PYSTREAM_DIR, "user_data", "last_profiles.db")
+        self.db_folder = "user_data"
+        self.db_filename = "last_profiles.sqlite"
+        os.makedirs(os.path.join(_PYSTREAM_DIR, self.db_folder), exist_ok=True)
+
+        db_path = os.path.join(_PYSTREAM_DIR, self.db_folder, self.db_filename)
+        if os.path.isfile(db_path):
+            os.remove(db_path)
         self.db_handler = ProfileDBHandler(db_path)
 
     def process_data(self, data: ProfileData) -> None:
@@ -100,10 +131,13 @@ class ProfilerHandler:
         throughput = {}
         for stage in data.ended.keys():
             if stage in self.previous_data.ended:
-                throughput[stage] = (
-                    data.ended[stage] - self.previous_data.started[stage]
-                )
+                throughput[stage] = data.ended[stage] - self.previous_data.ended[stage]
         return throughput
+
+    def summarize(self):
+        latency, throughput = self.db_handler.summarize()
+        print(latency)
+        print(throughput)
 
     def cleanup(self):
         self.db_handler.close()
