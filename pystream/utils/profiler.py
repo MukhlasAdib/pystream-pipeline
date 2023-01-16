@@ -96,8 +96,6 @@ class ProfilerHandler:
         self.max_history = max_history
 
         self.previous_data = ProfileData()
-        self.latency_history = []
-        self.throughput_history = []
         self.is_first = True
 
         self.db_folder = "user_data"
@@ -131,13 +129,13 @@ class ProfilerHandler:
         throughput = {}
         for stage in data.ended.keys():
             if stage in self.previous_data.ended:
-                throughput[stage] = data.ended[stage] - self.previous_data.ended[stage]
+                period = data.ended[stage] - self.previous_data.ended[stage]
+                throughput[stage] = 1 / period
         return throughput
 
-    def summarize(self):
+    def summarize(self) -> Tuple[Dict[str, float], Dict[str, float]]:
         latency, throughput = self.db_handler.summarize()
-        print(latency)
-        print(throughput)
+        return latency, throughput
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         self.db_handler.close()

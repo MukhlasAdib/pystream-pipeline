@@ -1,3 +1,4 @@
+import os
 import sqlite3
 from pathlib import Path
 from typing import Dict, List, Tuple
@@ -5,6 +6,7 @@ from typing import Dict, List, Tuple
 import pandas as pd
 import pytest
 
+import pystream.utils.profiler as _profiler
 from pystream.data.pipeline_data import ProfileData
 from pystream.utils.profiler import ProfileDBHandler, ProfilerHandler
 
@@ -47,14 +49,6 @@ def generate_test_latency_and_throughput_dict(
         for _ in range(num_data)
     ]
     return latency_data, throughput_data
-
-
-def test_profiler():
-    profiler_handler = ProfilerHandler()
-    data = generate_test_profile_data(3, 5, 0.5, 4)
-    for d in data:
-        profiler_handler.process_data(d)
-    profiler_handler.summarize()
 
 
 class TestProfileDBHandler:
@@ -111,3 +105,48 @@ class TestProfileDBHandler:
         for stage in latencies[0].keys():
             assert sum_lat[stage] == latency
             assert sum_fps[stage] == throughput
+
+
+class TestProfilerHandler:
+    @pytest.fixture(autouse=True)
+    def _init_profiler(self, tmp_path: Path, monkeypatch):
+        monkeypatch.setattr(_profiler, "_PYSTREAM_DIR", str(tmp_path))
+        self.max_history = 100
+        self.db_path = os.path.join(str(tmp_path), "user_data", "last_profiles.sqlite")
+        self.profiler_handler = ProfilerHandler(max_history=self.max_history)
+
+    def test_init(self):
+        assert self.profiler_handler.db_handler.db_path == self.db_path
+        os.path.isfile(self.db_path)
+
+    def test_process_data_and_summarize(self):
+        num_data = 5
+        num_stages = 7
+        latency = 0.5
+        throughput = 6.8
+        data = generate_test_profile_data(
+            num_data=num_data,
+            num_stages=num_stages,
+            latency=latency,
+            throughput=throughput,
+        )
+
+        for d in data:
+            self.profiler_handler.process_data(d)
+
+        with sqlite3.connect(self.db_path) as test_conn:
+            for table_name in [
+                self.profiler_handler.db_handler.latency_table,
+                self.profiler_handler.db_handler.throughput_table,
+            ]:
+                table_df = pd.read_sql_query(
+                    f"SELECT * FROM {table_name}", test_conn, dtype=float
+                )
+                assert table_df.shape[0] == num_data - 1
+
+        latencies, throughputs = self.profiler_handler.summarize()
+        assert len(latencies) == num_stages
+        assert len(throughputs) == num_stages
+        for k in latencies.keys():
+            assert pytest.approx(latencies[k], rel=0.001) == latency
+            assert pytest.approx(throughputs[k], rel=0.001) == throughput
