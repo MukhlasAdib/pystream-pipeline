@@ -27,6 +27,11 @@ class ProfileDBHandler:
         """
 
     def __init__(self, db_path: str) -> None:
+        """Handler of the profile database
+
+        Args:
+            db_path (str): path to the SQLite DB
+        """
         self.db_path = db_path
         self.latency_table = "Latency"
         self.throughput_table = "Throughput"
@@ -93,6 +98,12 @@ class ProfileDBHandler:
 
 class ProfilerHandler:
     def __init__(self, max_history: int = 100000) -> None:
+        """Handler of pipeline profiler
+
+        Args:
+            max_history (int, optional): The maximum history to be saved.
+                Defaults to 100000.
+        """
         self.max_history = max_history
 
         self.previous_data = ProfileData()
@@ -108,6 +119,11 @@ class ProfilerHandler:
         self.db_handler = ProfileDBHandler(db_path)
 
     def process_data(self, data: ProfileData) -> None:
+        """Process pipeline profile data, put them into the DB
+
+        Args:
+            data (ProfileData): the pipeline profile data
+        """
         if self.is_first:
             self.previous_data = replace(data)
             self.is_first = False
@@ -134,6 +150,13 @@ class ProfilerHandler:
         return throughput
 
     def summarize(self) -> Tuple[Dict[str, float], Dict[str, float]]:
+        """Get the average latency and throughput
+
+        Returns:
+            Tuple[Dict[str, float], Dict[str, float]]: dictionary of the latency and
+            throughput data respectively. The data is a dict where the key is the
+            stage name
+        """
         latency, throughput = self.db_handler.summarize()
         return latency, throughput
 
