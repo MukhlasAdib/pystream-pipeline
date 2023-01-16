@@ -1,6 +1,6 @@
 import sqlite3
-import time
 from pathlib import Path
+from typing import Dict, List, Tuple
 
 import pandas as pd
 import pytest
@@ -15,7 +15,7 @@ def generate_test_profile_data(
     latency: float = 0.5,
     throughput: float = 4,
     base_time: float = 100,
-):
+) -> List[ProfileData]:
     current_base = base_time
     stages_name = [f"Stage{chr(i + 65)}" for i in range(num_stages)]
     data = []
@@ -30,6 +30,23 @@ def generate_test_profile_data(
             ended[stage] = current
         data.append(ProfileData(started=started, ended=ended))
     return data
+
+
+def generate_test_latency_and_throughput_dict(
+    num_data: int = 3,
+    num_stages: int = 5,
+    latency: float = 0.5,
+    throughput: float = 4,
+) -> Tuple[List[Dict[str, float]], List[Dict[str, float]]]:
+    latency_data = [
+        {f"Stage{chr(i + 65)}": latency for i in range(num_stages)}
+        for _ in range(num_data)
+    ]
+    throughput_data = [
+        {f"Stage{chr(i + 65)}": throughput for i in range(num_stages)}
+        for _ in range(num_data)
+    ]
+    return latency_data, throughput_data
 
 
 def test_profiler():
@@ -63,3 +80,34 @@ class TestProfileDBHandler:
                 )
                 assert table_df.shape[0] == 0
                 assert table_df.columns == [self.INDEX_COLUMN_NAME]
+
+    def test_put_data_and_summarize(self):
+        latency = 0.53
+        throughput = 10
+        num_data = 4
+        num_stages = 5
+        latencies, throughputs = generate_test_latency_and_throughput_dict(
+            num_data=num_data,
+            num_stages=num_stages,
+            latency=latency,
+            throughput=throughput,
+        )
+        for lat, fps in zip(latencies, throughputs):
+            self.profiler_db.put_data(lat, fps)
+
+        with sqlite3.connect(self.db_path) as test_conn:
+            for table_name in [self.LATENCY_TABLE, self.THROUGHPUT_TABLE]:
+                table_df = pd.read_sql_query(
+                    f"SELECT * FROM {table_name}", test_conn, dtype=float
+                )
+                assert table_df.shape[0] == num_data
+
+        sum_lat, sum_fps = self.profiler_db.summarize("mean")
+        for stage in latencies[0].keys():
+            assert sum_lat[stage] == latency
+            assert sum_fps[stage] == throughput
+
+        sum_lat, sum_fps = self.profiler_db.summarize("median")
+        for stage in latencies[0].keys():
+            assert sum_lat[stage] == latency
+            assert sum_fps[stage] == throughput
