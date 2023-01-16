@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from pystream.data.pipeline_data import (
     InputGeneratorRequest,
@@ -23,6 +23,8 @@ class Pipeline:
             used to generate input data if you want the pipeline to run autonomously.
             If None, the input needs to be given by invoking "forward" method.
             Defaults to None.
+        use_profiles (bool, optional): Whether to implement profiler to the pipeline.
+            Defaults to False.
     """
 
     def __init__(
@@ -37,10 +39,7 @@ class Pipeline:
         if input_generator is not None:
             self._input_generator = input_generator
 
-        self.profiler = None
-        if use_profiler:
-            self.profiler = ProfilerHandler()
-
+        self.profiler = ProfilerHandler() if use_profiler else None
         self._automation = None
 
     def add(self, stage: StageCallable) -> None:
@@ -161,6 +160,18 @@ class Pipeline:
 
         if self.profiler is not None:
             self.profiler.cleanup()
+
+    def get_profiles(self) -> Tuple[Dict[str, float], Dict[str, float]]:
+        """Get profiles data
+
+        Returns:
+            Tuple[Dict[str, float], Dict[str, float]]: dictionary of the latency and
+            throughput data respectively. The data is a dict where the key is the
+            stage name
+        """
+        if self.profiler is None:
+            return {}, {}
+        return self.profiler.summarize()
 
     def _generate_pipeline_data(self, data: Any = _request_generator) -> PipelineData:
         """Handle whether to use input generator or given user data"""
