@@ -4,3 +4,7 @@ class PipelineUndefined(Exception):
 
 class PipelineTerminated(Exception):
     pass
+
+
+class InvalidStageName(ValueError):
+    pass
