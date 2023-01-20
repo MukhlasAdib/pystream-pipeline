@@ -13,6 +13,7 @@ from pystream.pipeline.parallel_pipeline import (
 )
 from pystream.stage.container import StageContainer
 from pystream.utils.errors import PipelineTerminated
+from pystream.utils.profiler import ProfilerHandler
 
 
 def test_send_output():
@@ -120,8 +121,11 @@ class TestStagedThreadPipeline:
         self.num_stages = 5
         self.stages = []
         for i in range(self.num_stages):
-            self.stages.append(dummy_stage(val=i, wait=0.5))
-        self.pipeline = StagedThreadPipeline(self.stages)
+            self.stages.append(dummy_stage(val=i, wait=0.1))
+        self.profiler = ProfilerHandler()
+        self.pipeline = StagedThreadPipeline(
+            self.stages, profiler_handler=self.profiler
+        )
 
     def test_init(self):
         assert len(self.pipeline.stage_threads) == self.num_stages + 1
@@ -132,10 +136,14 @@ class TestStagedThreadPipeline:
 
     def test_forward_and_get_results(self):
         assert self.pipeline.get_results().data is None
-        self.pipeline.forward(PipelineData(data=[]))
-        time.sleep(3)
+        for _ in range(3):
+            self.pipeline.forward(PipelineData(data=[]))
+            time.sleep(0.2)
+        time.sleep(1)
         res = self.pipeline.get_results()
         assert res.data == list(range(self.num_stages))
+        assert len(self.profiler.summarize()[0]) == self.num_stages
+        assert len(self.profiler.summarize()[1]) == self.num_stages
 
     def test_cleanup(self):
         self.pipeline.cleanup()

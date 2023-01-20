@@ -11,7 +11,7 @@ class ProfileData:
 @dataclass
 class PipelineData:
     data: Any = None
-    profile: ProfileData = ProfileData()
+    profile: ProfileData = field(default_factory=ProfileData)
 
 
 class InputGeneratorRequest:
