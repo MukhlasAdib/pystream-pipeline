@@ -158,9 +158,6 @@ class Pipeline:
             self.pipeline.cleanup()
             self.pipeline = None
 
-        if self.profiler is not None:
-            self.profiler.cleanup()
-
     def get_profiles(self) -> Tuple[Dict[str, float], Dict[str, float]]:
         """Get profiles data
 

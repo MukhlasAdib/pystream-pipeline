@@ -97,9 +97,6 @@ class ProfileDBHandler:
         throughput = self._summarize_table(self.throughput_table, stat)
         return latency, throughput
 
-    def close(self) -> None:
-        pass
-
     @property
     def conn(self) -> sqlite3.Connection:
         return sqlite3.connect(self.db_path)
@@ -168,6 +165,3 @@ class ProfilerHandler:
         """
         latency, throughput = self.db_handler.summarize()
         return latency, throughput
-
-    def cleanup(self) -> None:
-        self.db_handler.close()
