@@ -172,7 +172,8 @@ class StagedThreadPipeline(PipelineBase):
         self.starter = Event()
         # The first stage's input is the output
         # of the pipeline handler
-        self.main_output_queue = input_queue = Queue(maxsize=1)
+        input_queue = Queue(maxsize=1)
+        self.main_output_queue = input_queue
         self.stage_threads: List[StageThread] = []
         self.stage_links: List[StageLinks] = []
         # Create the stage threars one by one along with the links

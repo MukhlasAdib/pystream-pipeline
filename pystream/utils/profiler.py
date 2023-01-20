@@ -1,5 +1,5 @@
+import copy
 import sqlite3
-from dataclasses import replace
 from typing import Dict, Literal, Tuple
 
 import os
@@ -38,7 +38,6 @@ class ProfileDBHandler:
 
         if os.path.isfile(self.db_path):
             os.remove(self.db_path)
-        self.conn = sqlite3.connect(self.db_path)
         self._create_tables()
 
         self.column_names = []
@@ -54,6 +53,9 @@ class ProfileDBHandler:
         self.conn.commit()
 
     def _put_one_table(self, data: Dict[str, float], table_name: str) -> None:
+        if len(data) == 0:
+            return
+
         for col in data.keys():
             if col not in self.column_names:
                 self._add_new_column(col)
@@ -93,7 +95,11 @@ class ProfileDBHandler:
         return latency, throughput
 
     def close(self) -> None:
-        self.conn.close()
+        pass
+
+    @property
+    def conn(self) -> sqlite3.Connection:
+        return sqlite3.connect(self.db_path)
 
 
 class ProfilerHandler:
@@ -125,13 +131,13 @@ class ProfilerHandler:
             data (ProfileData): the pipeline profile data
         """
         if self.is_first:
-            self.previous_data = replace(data)
+            self.previous_data = copy.deepcopy(data)
             self.is_first = False
             return
 
         latency = self._calculate_latency(data)
         throughput = self._calculate_throughput(data)
-        self.previous_data = replace(data)
+        self.previous_data = copy.deepcopy(data)
         self.db_handler.put_data(latency, throughput)
 
     def _calculate_latency(self, data: ProfileData) -> Dict[str, float]:
