@@ -134,7 +134,7 @@ class TestStagedThreadPipeline:
             assert stage_thread.links.starter.is_set()
             assert stage_thread.is_alive()
 
-    def test_forward_and_get_results(self):
+    def test_forward_and_get_results_and_profiler(self):
         assert self.pipeline.get_results().data is None
         for _ in range(3):
             self.pipeline.forward(PipelineData(data=[]))

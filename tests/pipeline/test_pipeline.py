@@ -8,6 +8,7 @@ from pystream.pipeline.parallel_pipeline import StagedThreadPipeline
 from pystream.pipeline.pipeline import PipelineUndefined
 from pystream.pipeline.pipeline_base import PipelineBase
 from pystream.data.pipeline_data import PipelineData
+from pystream.utils.profiler import ProfilerHandler
 
 
 class MockPipeline(PipelineBase):
@@ -36,7 +37,7 @@ def mock_input_generator():
 class TestPipeline:
     @pytest.fixture(autouse=True)
     def _create_pipeline(self):
-        self.pipeline = Pipeline(mock_input_generator)
+        self.pipeline = Pipeline(mock_input_generator, use_profiler=True)
 
     def test_add(self, dummy_stage):
         assert len(self.pipeline.stages_sequence) == 0
@@ -116,3 +117,7 @@ class TestPipeline:
         ret = self.pipeline._generate_pipeline_data(new_data)
         assert isinstance(ret, PipelineData)
         assert ret.data == new_data
+
+    def test_profiler(self):
+        assert isinstance(self.pipeline.profiler, ProfilerHandler)
+        assert self.pipeline.get_profiles() == ({}, {})

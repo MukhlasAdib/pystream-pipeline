@@ -17,7 +17,7 @@ class TestSerialPipeline:
         self.profiler = ProfilerHandler()
         self.pipeline = SerialPipeline(self.stages, profiler_handler=self.profiler)
 
-    def test_forward_and_get_results(self):
+    def test_forward_and_get_results_and_profiler(self):
         num_cycle = 5
         for _ in range(num_cycle):
             new_data = PipelineData(data=[])
