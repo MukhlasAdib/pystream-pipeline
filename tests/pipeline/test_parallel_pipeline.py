@@ -142,8 +142,13 @@ class TestStagedThreadPipeline:
         time.sleep(1)
         res = self.pipeline.get_results()
         assert res.data == list(range(self.num_stages))
-        assert len(self.profiler.summarize()[0]) == self.num_stages
-        assert len(self.profiler.summarize()[1]) == self.num_stages
+
+        latency, throughput = self.profiler.summarize()
+        assert len(latency) == self.num_stages
+        assert len(throughput) == self.num_stages
+        for lat, fps in zip(latency.values(), throughput.values()):
+            assert lat > 0
+            assert fps > 0
 
     def test_cleanup(self):
         self.pipeline.cleanup()

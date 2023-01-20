@@ -10,8 +10,9 @@ class TestSerialPipeline:
     def _create_pipeline(self, dummy_stage):
         self.stages = []
         self.num_stages = 3
+        self.wait_time = 0.1
         for i in range(self.num_stages):
-            dummy = dummy_stage(val=i, wait=0.1)
+            dummy = dummy_stage(val=i, wait=self.wait_time)
             self.stages.append(dummy)
         self.profiler = ProfilerHandler()
         self.pipeline = SerialPipeline(self.stages, profiler_handler=self.profiler)
@@ -27,8 +28,13 @@ class TestSerialPipeline:
             res = self.pipeline.get_results()
             assert res.data == [i for i in range(self.num_stages)]
             assert self.pipeline.results.data is None
-        assert len(self.profiler.summarize()[0]) == self.num_stages
-        assert len(self.profiler.summarize()[1]) == self.num_stages
+
+        latency, throughput = self.profiler.summarize()
+        assert len(latency) == self.num_stages
+        assert len(throughput) == self.num_stages
+        for lat, fps in zip(latency.values(), throughput.values()):
+            assert lat > 0
+            assert fps > 0
 
     def test_cleanup(self):
         self.pipeline.cleanup()
