@@ -17,14 +17,15 @@ class TestSerialPipeline:
         self.pipeline = SerialPipeline(self.stages, profiler_handler=self.profiler)
 
     def test_forward_and_get_results(self):
-        for _ in range(5):
+        num_cycle = 5
+        for _ in range(num_cycle):
             new_data = PipelineData(data=[])
             ret = self.pipeline.forward(new_data)
             assert ret == True
             assert self.pipeline.results is new_data
 
             res = self.pipeline.get_results()
-            assert res.data == [0, 1, 2]
+            assert res.data == [i for i in range(self.num_stages)]
             assert self.pipeline.results.data is None
         assert len(self.profiler.summarize()[0]) == self.num_stages
         assert len(self.profiler.summarize()[1]) == self.num_stages

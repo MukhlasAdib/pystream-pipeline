@@ -12,7 +12,7 @@ from pystream.data.pipeline_data import ProfileData
 class ProfileDBHandler:
     _CREATE_TABLE_QUERY = """
         CREATE TABLE {} (
-            data_num INTEGER PRIMARY KEY
+            data_num INTEGER PRIMARY KEY AUTOINCREMENT
         );
         """
 
@@ -48,25 +48,28 @@ class ProfileDBHandler:
         cur.execute(self._CREATE_TABLE_QUERY.format(self.throughput_table))
 
     def put_data(self, latency: Dict[str, float], throughput: Dict[str, float]) -> None:
-        self._put_one_table(latency, self.latency_table)
-        self._put_one_table(throughput, self.throughput_table)
-        self.conn.commit()
+        conn = self.conn
+        self._put_one_table(latency, self.latency_table, conn)
+        self._put_one_table(throughput, self.throughput_table, conn)
+        conn.commit()
 
-    def _put_one_table(self, data: Dict[str, float], table_name: str) -> None:
+    def _put_one_table(
+        self, data: Dict[str, float], table_name: str, conn: sqlite3.Connection
+    ) -> None:
         if len(data) == 0:
             return
 
         for col in data.keys():
             if col not in self.column_names:
-                self._add_new_column(col)
+                self._add_new_column(col, conn)
 
         columns = ",".join(data.keys())
         values = ",".join([str(v) for v in data.values()])
-        cur = self.conn.cursor()
+        cur = conn.cursor()
         cur.execute(self._PUT_DATA_QUERY.format(table_name, columns, values))
 
-    def _add_new_column(self, column_name: str) -> None:
-        cur = self.conn.cursor()
+    def _add_new_column(self, column_name: str, conn: sqlite3.Connection) -> None:
+        cur = conn.cursor()
         cur.execute(self._ADD_COLUMN_QUERY.format(self.latency_table, column_name))
         cur.execute(self._ADD_COLUMN_QUERY.format(self.throughput_table, column_name))
         self.column_names.append(column_name)
