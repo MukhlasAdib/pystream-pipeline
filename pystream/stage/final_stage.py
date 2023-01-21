@@ -2,6 +2,7 @@ from typing import Optional
 
 from pystream.data.pipeline_data import PipelineData
 from pystream.stage.stage import Stage
+from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE
 from pystream.utils.profiler import ProfilerHandler
 
 
@@ -11,6 +12,7 @@ class FinalStage(Stage):
         self._name = "FinalStage"
 
     def __call__(self, data: PipelineData) -> PipelineData:
+        data.profile.tick_end(_PIPELINE_NAME_IN_PROFILE)
         if self.profiler_handler is not None:
             self.profiler_handler.process_data(data.profile)
         return data
