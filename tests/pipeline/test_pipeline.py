@@ -8,6 +8,7 @@ from pystream.pipeline.parallel_pipeline import StagedThreadPipeline
 from pystream.pipeline.pipeline import PipelineUndefined
 from pystream.pipeline.pipeline_base import PipelineBase
 from pystream.data.pipeline_data import PipelineData
+from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE
 from pystream.utils.profiler import ProfilerHandler
 
 
@@ -66,6 +67,10 @@ class TestPipeline:
         assert ret == True
         assert isinstance(self.pipeline.pipeline.last_data, PipelineData)
         assert self.pipeline.pipeline.last_data.data == new_data
+        assert (
+            _PIPELINE_NAME_IN_PROFILE
+            in self.pipeline.pipeline.last_data.profile.started
+        )
 
     def test_forward_generator(self):
         self.pipeline.pipeline = MockPipeline()
