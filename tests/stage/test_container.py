@@ -4,7 +4,7 @@ from typing import Type
 from pystream.data.pipeline_data import PipelineData
 from pystream.stage.container import StageContainer
 from pystream.utils.errors import InvalidStageName
-from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE
+from pystream.utils.general import _FINAL_STAGE_NAME, _PIPELINE_NAME_IN_PROFILE
 from tests.conftest import DummyStage
 
 
@@ -22,6 +22,8 @@ class TestStageContainer:
             cont = StageContainer(self.stage, "Test-Name")
         with pytest.raises(InvalidStageName):
             cont = StageContainer(self.stage, _PIPELINE_NAME_IN_PROFILE)
+        with pytest.raises(InvalidStageName):
+            cont = StageContainer(self.stage, _FINAL_STAGE_NAME)
 
     def test_call(self):
         data = PipelineData(data=[])
