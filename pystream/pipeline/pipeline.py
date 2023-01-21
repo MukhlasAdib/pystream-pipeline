@@ -12,6 +12,7 @@ from pystream.stage.stage import StageCallable
 from pystream.pipeline.serial_pipeline import SerialPipeline
 from pystream.pipeline.parallel_pipeline import StagedThreadPipeline
 from pystream.utils.errors import PipelineUndefined
+from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE
 from pystream.utils.profiler import ProfilerHandler
 
 
@@ -115,6 +116,7 @@ class Pipeline:
         if self.pipeline is None:
             raise PipelineUndefined("Pipeline has not been defined")
         pipeline_data = self._generate_pipeline_data(data)
+        pipeline_data.profile.tick_start(_PIPELINE_NAME_IN_PROFILE)
         return self.pipeline.forward(pipeline_data)
 
     def start_loop(self, period: float = 0.01) -> None:

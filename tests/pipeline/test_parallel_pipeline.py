@@ -13,6 +13,7 @@ from pystream.pipeline.parallel_pipeline import (
 )
 from pystream.stage.container import StageContainer
 from pystream.utils.errors import PipelineTerminated
+from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE
 from pystream.utils.profiler import ProfilerHandler
 
 
@@ -137,15 +138,19 @@ class TestStagedThreadPipeline:
     def test_forward_and_get_results_and_profiler(self):
         assert self.pipeline.get_results().data is None
         for _ in range(3):
-            self.pipeline.forward(PipelineData(data=[]))
+            data = PipelineData(data=[])
+            data.profile.tick_start(_PIPELINE_NAME_IN_PROFILE)
+            self.pipeline.forward(data)
             time.sleep(0.2)
         time.sleep(1)
         res = self.pipeline.get_results()
         assert res.data == list(range(self.num_stages))
 
         latency, throughput = self.profiler.summarize()
-        assert len(latency) == self.num_stages
-        assert len(throughput) == self.num_stages
+        assert len(latency) == self.num_stages + 1
+        assert len(throughput) == self.num_stages + 1
+        assert _PIPELINE_NAME_IN_PROFILE in latency
+        assert _PIPELINE_NAME_IN_PROFILE in throughput
         for lat, fps in zip(latency.values(), throughput.values()):
             assert lat > 0
             assert fps > 0
