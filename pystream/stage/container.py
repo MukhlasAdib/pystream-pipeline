@@ -3,7 +3,7 @@ from typing import Optional
 from pystream.data.pipeline_data import PipelineData
 from pystream.stage.stage import Stage, StageCallable
 from pystream.utils.errors import InvalidStageName
-from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE
+from pystream.utils.general import _FINAL_STAGE_NAME, _PIPELINE_NAME_IN_PROFILE
 
 
 _STAGE_COUNTER = 0
@@ -20,6 +20,8 @@ def check_stage_name(name: str) -> None:
         raise InvalidStageName("Stage name cannot contain dash ('-')")
     if _PIPELINE_NAME_IN_PROFILE == name:
         raise InvalidStageName(f"Stage name cannot be {_PIPELINE_NAME_IN_PROFILE}")
+    if _FINAL_STAGE_NAME == name:
+        raise InvalidStageName(f"Stage name cannot be {_FINAL_STAGE_NAME}")
 
 
 class StageContainer(Stage):
