@@ -26,6 +26,7 @@ include = [
 [tool.poetry.dependencies]
 python = "^3.8"
 pandas = "^1.5.2"
+loguru = "^0.6.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.0"
@@ -36,6 +37,7 @@ opencv-python = "^4.5.5"
 Sphinx = "^5.0.2"
 sphinx-rtd-theme = "^1.0.0"
 ipykernel = "^6.19.4"
+pytest-cov = "^4.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

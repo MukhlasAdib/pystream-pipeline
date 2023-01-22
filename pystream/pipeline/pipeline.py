@@ -169,6 +169,7 @@ class Pipeline:
             stage name
         """
         if self.profiler is None:
+            print("Profiler is not activated")
             return {}, {}
         return self.profiler.summarize()
 
