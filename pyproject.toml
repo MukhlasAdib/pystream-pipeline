@@ -36,6 +36,7 @@ opencv-python = "^4.5.5"
 Sphinx = "^5.0.2"
 sphinx-rtd-theme = "^1.0.0"
 ipykernel = "^6.19.4"
+pytest-cov = "^4.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
