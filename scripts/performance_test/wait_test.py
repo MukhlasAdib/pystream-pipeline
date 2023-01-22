@@ -1,3 +1,11 @@
+"""
+This is a script to measure the performance of a dummy pipeline.
+The pipeline consists of dummy stages that do nothing but wait
+for specified seconds. Therefore, any deviation from the wait
+time in the profile data can be seen as the performance degradation
+cause by PyStream handling.
+"""
+
 import argparse
 import time
 
