@@ -26,6 +26,7 @@ include = [
 [tool.poetry.dependencies]
 python = "^3.8"
 pandas = "^1.5.2"
+loguru = "^0.6.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.0"
