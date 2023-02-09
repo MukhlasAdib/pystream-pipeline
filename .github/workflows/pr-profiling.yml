@@ -15,6 +15,6 @@ jobs:
           python-version: 3.8
           cache: "poetry"
       - name: Install dependencies
-        run: poetry install --no-root
+        run: poetry install --no-root --dev
       - name: Wait test profiling
         run: python scripts/performance_test/wait_test.py
