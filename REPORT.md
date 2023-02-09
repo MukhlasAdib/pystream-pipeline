@@ -1,0 +1,64 @@
+## Serial Pipeline
+
+### Latency
+
+Stage_1: 0.5071131285789999 s
+
+Stage_2: 0.5081352714249598 s
+
+Stage_3: 0.5094550476032531 s
+
+Stage_4: 0.5099206666706041 s
+
+Stage_5: 0.5108090714285416 s
+
+Pipeline: 2.545505880965807 s
+
+
+
+### Throughput
+
+Stage_1: 0.3891632719630886 data/s
+
+Stage_2: 0.3891934725239924 data/s
+
+Stage_3: 0.3891590320345453 data/s
+
+Stage_4: 0.38922252997014295 data/s
+
+Stage_5: 0.38921928835896746 data/s
+
+Pipeline: 0.3892193418731417 data/s
+
+## Threaded Pipeline
+
+### Latency
+
+Stage_6: 0.5129868951055458 s
+
+Stage_7: 0.5126204088252658 s
+
+Stage_8: 0.5125122362537784 s
+
+Stage_9: 0.5123368774508765 s
+
+Stage_10: 0.5124900519742868 s
+
+Pipeline: 2.5647842353072896 s
+
+
+
+### Throughput
+
+Stage_6: 1.936363907801028 data/s
+
+Stage_7: 1.9368158156468067 data/s
+
+Stage_8: 1.936735109031776 data/s
+
+Stage_9: 1.9367679559217457 data/s
+
+Stage_10: 1.9370404969951676 data/s
+
+Pipeline: 1.9370382126121137 data/s
+

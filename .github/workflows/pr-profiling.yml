@@ -25,3 +25,9 @@ jobs:
         run: poetry install
       - name: Wait test profiling
         run: poetry run python scripts/performance_test/wait_test.py
+      - name: Post the profile
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          filePath: REPORT.md
+          comment_tag: profile-report
+          mode: recreate
