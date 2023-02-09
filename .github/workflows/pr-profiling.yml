@@ -17,4 +17,4 @@ jobs:
       - name: Install dependencies
         run: poetry install --no-root --with dev
       - name: Wait test profiling
-        run: python scripts/performance_test/wait_test.py
+        run: poetry run scripts/performance_test/wait_test.py
