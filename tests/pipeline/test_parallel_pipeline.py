@@ -121,16 +121,22 @@ class TestStagedThreadPipeline:
     def _create_pipeline(self, dummy_stage):
         self.num_stages = 5
         self.stages = []
+        self.names = []
         for i in range(self.num_stages):
             self.stages.append(dummy_stage(val=i, wait=0.1))
+            name = f"Sample_{i}"
+            self.names.append(name)
         self.profiler = ProfilerHandler()
         self.pipeline = StagedThreadPipeline(
-            self.stages, profiler_handler=self.profiler
+            self.stages, self.names, profiler_handler=self.profiler
         )
 
     def test_init(self):
+        assert len(self.pipeline.stages) == self.num_stages + 1
         assert len(self.pipeline.stage_threads) == self.num_stages + 1
         assert len(self.pipeline.stage_links) == self.num_stages + 1
+        for i, stage in enumerate(self.pipeline.stages[:-1]):
+            assert stage.name == self.names[i]
         for stage_thread in self.pipeline.stage_threads:
             assert stage_thread.links.starter.is_set()
             assert stage_thread.is_alive()
@@ -149,6 +155,9 @@ class TestStagedThreadPipeline:
         latency, throughput = self.profiler.summarize()
         assert len(latency) == self.num_stages + 1
         assert len(throughput) == self.num_stages + 1
+        for name in self.names:
+            assert name in latency
+            assert name in throughput
         assert _PIPELINE_NAME_IN_PROFILE in latency
         assert _PIPELINE_NAME_IN_PROFILE in throughput
         for lat, fps in zip(latency.values(), throughput.values()):

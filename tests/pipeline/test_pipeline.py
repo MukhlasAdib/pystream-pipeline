@@ -42,9 +42,10 @@ class TestPipeline:
 
     def test_add(self, dummy_stage):
         assert len(self.pipeline.stages_sequence) == 0
-        for _ in range(5):
-            self.pipeline.add(dummy_stage())
+        for i in range(5):
+            self.pipeline.add(dummy_stage(), f"Sample_{i}")
         assert len(self.pipeline.stages_sequence) == 5
+        assert len(self.pipeline.stage_names) == 5
 
     def test_serialize(self, dummy_stage):
         assert self.pipeline.pipeline is None

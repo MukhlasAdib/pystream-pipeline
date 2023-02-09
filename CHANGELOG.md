@@ -37,6 +37,7 @@
 - [x] Unit tests for staged pipeline operations.
 - [x] Unit tests for functional pipeline operations.
 - [ ] Use logger instead of print
+- [x] Specify stage name
 
 ### v0.1.4
 

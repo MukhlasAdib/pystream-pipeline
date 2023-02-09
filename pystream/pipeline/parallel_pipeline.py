@@ -139,6 +139,7 @@ class StagedThreadPipeline(PipelineBase):
     def __init__(
         self,
         stages: List[StageCallable],
+        names: List[Optional[str]],
         block_input: bool = True,
         input_timeout: float = 10,
         profiler_handler: Optional[ProfilerHandler] = None,
@@ -149,14 +150,20 @@ class StagedThreadPipeline(PipelineBase):
         Args:
             stages (List[StageCallable]): The stages to be run
                 in sequence.
+            names (List[Optional[str]]): Stage names. If the name is None,
+                default stage name will be given.
             block_input (bool, optional): Whether to set the forward method
                 into blocking mode with the specified timeout in input_timeout.
                 Defaults to True.
             input_timeout (float, optional): Blocking timeout for the forward
                 method in seconds. Defaults to 10.
+            profiler_handler (Optional[ProfilerHandler]): Handler for the profiler.
+                If None, no profiling attempt will be done.
         """
         self.final_stage = FinalStage(profiler_handler)
-        self.stages: List[Stage] = [StageContainer(stage) for stage in stages]
+        self.stages: List[Stage] = [
+            StageContainer(stage, name) for stage, name in zip(stages, names)
+        ]
         self.stages.append(self.final_stage)
         self.block_input = block_input
         self.input_timeout = input_timeout

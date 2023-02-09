@@ -34,6 +34,7 @@ class Pipeline:
         use_profiler: bool = False,
     ) -> None:
         self.stages_sequence: List[StageCallable] = []
+        self.stage_names: List[Optional[str]] = []
         self.pipeline: Optional[PipelineBase] = None
 
         self._input_generator: Callable[[], Any] = lambda: None
@@ -43,7 +44,7 @@ class Pipeline:
         self.profiler = ProfilerHandler() if use_profiler else None
         self._automation = None
 
-    def add(self, stage: StageCallable) -> None:
+    def add(self, stage: StageCallable, name: Optional[str] = None) -> None:
         """Add a stage into the pipeline
 
         The stage is in type of StageCallable, which is Union[Callable[[T], T], Stage].
@@ -58,8 +59,11 @@ class Pipeline:
 
         Args:
             stage (StageCallable): the stage to be added
+            name (Optional[str]): the stage name. If None default stage name will be given,
+                i.e. Stage_i where i is the stage sequence number. Defaults to None.
         """
         self.stages_sequence.append(stage)
+        self.stage_names.append(name)
 
     def serialize(self) -> Pipeline:
         """Turn the pipeline into serial pipeline. All stages will
@@ -69,7 +73,7 @@ class Pipeline:
             Pipeline: this pipeline itself
         """
         self.pipeline = SerialPipeline(
-            self.stages_sequence, profiler_handler=self.profiler
+            self.stages_sequence, self.stage_names, profiler_handler=self.profiler
         )
         return self
 
@@ -92,6 +96,7 @@ class Pipeline:
         """
         self.pipeline = StagedThreadPipeline(
             self.stages_sequence,
+            self.stage_names,
             block_input=block_input,
             input_timeout=input_timeout,
             profiler_handler=self.profiler,
