@@ -59,6 +59,8 @@ class Pipeline:
 
         Args:
             stage (StageCallable): the stage to be added
+            name (Optional[str]): the stage name. If None default stage name will be given,
+                i.e. Stage_i where i is the stage sequence number. Defaults to None.
         """
         self.stages_sequence.append(stage)
         self.stage_names.append(name)

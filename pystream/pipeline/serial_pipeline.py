@@ -15,6 +15,16 @@ class SerialPipeline(PipelineBase):
         names: List[Optional[str]],
         profiler_handler: Optional[ProfilerHandler] = None,
     ) -> None:
+        """The class that will handle the serial pipeline.
+
+        Args:
+            stages (List[StageCallable]): The stages to be run
+                in sequence.
+            names (List[Optional[str]]): Stage names. If the name is None,
+                default stage name will be given.
+            profiler_handler (Optional[ProfilerHandler]): Handler for the profiler.
+                If None, no profiling attempt will be done.
+        """
         self.final_stage = FinalStage(profiler_handler)
         self.pipeline: List[Stage] = [
             StageContainer(stage, name) for stage, name in zip(stages, names)
