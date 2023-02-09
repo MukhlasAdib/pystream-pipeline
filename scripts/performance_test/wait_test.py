@@ -10,6 +10,7 @@ import argparse
 import time
 
 from loguru import logger
+from tabulate import tabulate
 
 from pystream import Pipeline, Stage
 
@@ -17,12 +18,11 @@ from pystream import Pipeline, Stage
 _WRITER = None
 
 
-def log_and_write(msg):
+def write_to_file(msg):
     global _WRITER
     if _WRITER is None:
         _WRITER = open("REPORT.md", "w")
     _WRITER.write(msg + "\n\n")
-    logger.info(msg)
 
 
 class WaitStage(Stage):
@@ -91,32 +91,48 @@ def run(num_stages, wait_time, mode):
     return pipeline.get_profiles()
 
 
-def write_report(profile, write_file=False, header=None):
-    if write_file:
-        report = log_and_write
-    else:
-        report = logger.info
-
-    if header is not None:
-        report(header)
-    report("### Latency")
+def write_log(profile):
+    logger.info("### Latency")
     for k, v in profile[0].items():
-        report(f"**{k}**: {v} s")
-    report("")
-    report("### Throughput")
+        logger.info(f"**{k}**: {v} s")
+    logger.info("")
+    logger.info("### Throughput")
     for k, v in profile[1].items():
-        report(f"**{k}**: {v} data/s")
+        logger.info(f"**{k}**: {v} data/s")
+
+
+def write_report(profile, title=None):
+    if title is not None:
+        write_to_file(title)
+
+    data = []
+    for k in profile[0].keys():
+        d = [k, profile[0][k], profile[1][k]]
+        data.append(d)
+    table = tabulate(data, headers=["Stage", "Latency", "Throughput"], tablefmt="pipe")
+    write_to_file(table)
+
+
+def run_one_mode(args):
+    profile = run(args.num_stages, args.wait_time, args.mode)
+    write_log(profile)
+
+
+def run_reporting(args):
+    write_to_file("# Profiling Report")
+    profile = run(args.num_stages, args.wait_time, "serial")
+    write_log(profile)
+    write_report(profile, "## Serial Pipeline")
+    profile = run(args.num_stages, args.wait_time, "thread")
+    write_log(profile)
+    write_report(profile, "## Threaded Pipeline")
 
 
 def main(args):
     if args.mode != "report":
-        profile = run(args.num_stages, args.wait_time, args.mode)
-        write_report(profile, False)
+        run_one_mode(args)
     else:
-        profile = run(args.num_stages, args.wait_time, "serial")
-        write_report(profile, True, "## Serial Pipeline")
-        profile = run(args.num_stages, args.wait_time, "thread")
-        write_report(profile, True, "## Threaded Pipeline")
+        run_reporting(args)
 
 
 if __name__ == "__main__":
