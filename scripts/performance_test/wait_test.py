@@ -10,8 +10,19 @@ import argparse
 import time
 
 from loguru import logger
+from tabulate import tabulate
 
 from pystream import Pipeline, Stage
+
+
+_WRITER = None
+
+
+def write_to_file(msg):
+    global _WRITER
+    if _WRITER is None:
+        _WRITER = open("REPORT.md", "w")
+    _WRITER.write(msg + "\n\n")
 
 
 class WaitStage(Stage):
@@ -44,50 +55,95 @@ def parse_args():
     )
     parser.add_argument(
         "--wait-time",
-        default=1,
+        default=0.5,
         type=float,
         help="each stage wait time in seconds",
     )
     parser.add_argument(
         "--mode",
-        default="serial",
+        default="report",
         type=str,
-        help="pipeline mode serial / thread",
+        help="pipeline mode serial / thread / report",
     )
     args = parser.parse_args()
-    assert args.mode in ["thread", "serial"]
+    assert args.mode in ["thread", "serial", "report"]
     return args
 
 
-def main(args):
+def run(num_stages, wait_time, mode):
     logger.info("Creating pipeline ...")
-    pipeline = create_pipeline(args.num_stages, args.wait_time)
-    if args.mode == "thread":
+    pipeline = create_pipeline(num_stages, wait_time)
+    if mode == "thread":
         logger.info("Running pipeline in thread mode ...")
         pipeline.parallelize()
-    elif args.mode == "serial":
+    elif mode == "serial":
         logger.info("Running pipeline in serial mode ...")
         pipeline.serialize()
     else:
         raise ValueError("Invalid pipeline mode")
-    pipeline.start_loop(args.wait_time)
-    run_time = args.wait_time * 100 * 1.1
+    pipeline.start_loop(wait_time)
+    run_time = wait_time * 100 * 1.1
     logger.info(f"Waiting for {run_time} s...")
     time.sleep(run_time)
     logger.info(f"Finished")
     pipeline.stop_loop()
     logger.info("")
+    return pipeline.get_profiles()
 
-    logger.info("*REPORT*")
-    profile = pipeline.get_profiles()
-    logger.info("----- Latency -----")
+
+def write_log(profile):
+    logger.info("### Latency")
     for k, v in profile[0].items():
-        logger.info(f"{k}: {v} s")
+        logger.info(f"**{k}**: {v} s")
     logger.info("")
-    logger.info("---- Throughput----")
+    logger.info("### Throughput")
     for k, v in profile[1].items():
-        logger.info(f"{k}: {v} data/s")
+        logger.info(f"**{k}**: {v} data/s")
+
+
+def write_report(profile, title=None):
+    if title is not None:
+        write_to_file(title)
+
+    data = []
+    for k in profile[0].keys():
+        d = [k, profile[0][k], profile[1][k]]
+        data.append(d)
+    table = tabulate(data, headers=["Stage", "Latency", "Throughput"], tablefmt="pipe")
+    write_to_file(table)
+
+
+def run_one_mode(args):
+    profile = run(args.num_stages, args.wait_time, args.mode)
+    write_log(profile)
+
+
+def run_reporting(args):
+    write_to_file("# Profiling Report (Wait Test)")
+    write_to_file(f"Wait time: {args.wait_time} s")
+    write_to_file(f"Ideal pipeline latency: {args.wait_time * args.num_stages} s")
+    write_to_file(
+        f"Ideal pipeline serial throughput: {1 / (args.wait_time * args.num_stages)} data/s"
+    )
+    write_to_file(f"Ideal pipeline throughput: {1 / args.wait_time} data/s")
+    profile = run(args.num_stages, args.wait_time, "serial")
+    write_log(profile)
+    write_report(profile, "## Serial Pipeline")
+    profile = run(args.num_stages, args.wait_time, "thread")
+    write_log(profile)
+    write_report(profile, "## Threaded Pipeline")
+
+
+def main(args):
+    if args.mode != "report":
+        run_one_mode(args)
+    else:
+        run_reporting(args)
 
 
 if __name__ == "__main__":
     main(parse_args())
+
+if _WRITER is not None:
+    _WRITER.close()
+    _WRITER = None

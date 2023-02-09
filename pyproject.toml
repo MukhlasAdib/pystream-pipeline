@@ -27,8 +27,10 @@ include = [
 python = "^3.8"
 pandas = "^1.5.2"
 loguru = "^0.6.0"
+tabulate = "^0.9.0"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
+tqdm = "^4.64.1"
 pytest = "^7.2.0"
 black = "^22.3.0"
 docutils = "^0.17.1"

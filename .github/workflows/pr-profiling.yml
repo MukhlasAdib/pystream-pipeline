@@ -1,0 +1,36 @@
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - pystream/**
+      - scripts/performance_test/**
+
+jobs:
+  wait-test:
+    runs-on: ubuntu-latest
+    if: ${{ !github.event.pull_request.draft }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install poetry
+        uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: 1.3.2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+          cache: "poetry"
+      - name: Install dependencies
+        run: poetry install
+      - name: Wait test profiling
+        run: poetry run python scripts/performance_test/wait_test.py
+      - name: Post the profile
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          filePath: REPORT.md
+          comment_tag: profile-report
+          mode: recreate
