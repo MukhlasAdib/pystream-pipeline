@@ -5,6 +5,9 @@ on:
       - reopened
       - synchronize
       - ready_for_review
+    paths:
+      - pystream/**/*
+      - scripts/performance_test/**/*
 
 jobs:
   wait-test:
