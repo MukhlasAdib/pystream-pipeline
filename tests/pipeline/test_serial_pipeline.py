@@ -44,6 +44,9 @@ class TestSerialPipeline:
         latency, throughput = self.profiler.summarize()
         assert len(latency) == self.num_stages + 1
         assert len(throughput) == self.num_stages + 1
+        for name in self.names:
+            assert name in latency
+            assert name in throughput
         assert _PIPELINE_NAME_IN_PROFILE in latency
         assert _PIPELINE_NAME_IN_PROFILE in throughput
         for lat, fps in zip(latency.values(), throughput.values()):
