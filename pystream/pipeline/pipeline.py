@@ -71,7 +71,7 @@ class Pipeline:
             Pipeline: this pipeline itself
         """
         self.pipeline = SerialPipeline(
-            self.stages_sequence, profiler_handler=self.profiler
+            self.stages_sequence, self.stage_names, profiler_handler=self.profiler
         )
         return self
 
@@ -94,6 +94,7 @@ class Pipeline:
         """
         self.pipeline = StagedThreadPipeline(
             self.stages_sequence,
+            self.stage_names,
             block_input=block_input,
             input_timeout=input_timeout,
             profiler_handler=self.profiler,

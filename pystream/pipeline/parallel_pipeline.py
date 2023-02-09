@@ -139,6 +139,7 @@ class StagedThreadPipeline(PipelineBase):
     def __init__(
         self,
         stages: List[StageCallable],
+        names: List[Optional[str]],
         block_input: bool = True,
         input_timeout: float = 10,
         profiler_handler: Optional[ProfilerHandler] = None,
@@ -156,7 +157,9 @@ class StagedThreadPipeline(PipelineBase):
                 method in seconds. Defaults to 10.
         """
         self.final_stage = FinalStage(profiler_handler)
-        self.stages: List[Stage] = [StageContainer(stage) for stage in stages]
+        self.stages: List[Stage] = [
+            StageContainer(stage, name) for stage, name in zip(stages, names)
+        ]
         self.stages.append(self.final_stage)
         self.block_input = block_input
         self.input_timeout = input_timeout
