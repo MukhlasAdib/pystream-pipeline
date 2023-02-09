@@ -123,9 +123,9 @@ def run_reporting(args):
     write_to_file(f"Wait time: {args.wait_time} s")
     write_to_file(f"Ideal pipeline latency: {args.wait_time * args.num_stages} s")
     write_to_file(
-        f"Ideal pipeline throughput (serial): {1 / (args.wait_time * args.num_stages)} data/s"
+        f"Ideal pipeline serial throughput: {1 / (args.wait_time * args.num_stages)} data/s"
     )
-    write_to_file(f"Ideal pipeline throughput (parallel): {1 / args.wait_time} data/s")
+    write_to_file(f"Ideal pipeline throughput: {1 / args.wait_time} data/s")
     profile = run(args.num_stages, args.wait_time, "serial")
     write_log(profile)
     write_report(profile, "## Serial Pipeline")
