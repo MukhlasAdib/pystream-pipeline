@@ -3,12 +3,12 @@ import logging
 
 def create_default_logger(name: str) -> logging.Logger:
     formatter = logging.Formatter(
-        fmt="[%(name)s] %(asctime)s %(levelname)s: %(message)s"
+        fmt="[%(name)s] %(asctime)s - %(levelname)-10s: %(message)s"
     )
-    handler = logging.StreamHandler()
-    handler.setLevel(logging.INFO)
-    handler.setFormatter(formatter)
     logger = logging.getLogger(name)
+    logger.setLevel(logging.INFO)
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
     logger.addHandler(handler)
     return logger
 
