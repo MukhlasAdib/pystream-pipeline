@@ -10,6 +10,7 @@ from pystream.stage.container import StageContainer
 from pystream.stage.final_stage import FinalStage
 from pystream.stage.stage import Stage, StageCallable
 from pystream.utils.errors import PipelineTerminated
+from pystream.utils.logger import LOGGER
 from pystream.utils.profiler import ProfilerHandler
 
 
@@ -132,7 +133,7 @@ class StageThread(Thread):
         self.print_log(f"Thread terminated...")
 
     def print_log(self, msg: str) -> None:
-        print(f"FROM {self.name} ({get_ident()}): {msg}")
+        LOGGER.info(f"({self.name} {get_ident()}) {msg}")
 
 
 class StagedThreadPipeline(PipelineBase):
