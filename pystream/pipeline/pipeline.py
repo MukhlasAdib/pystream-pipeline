@@ -13,6 +13,7 @@ from pystream.pipeline.serial_pipeline import SerialPipeline
 from pystream.pipeline.parallel_pipeline import StagedThreadPipeline
 from pystream.utils.errors import PipelineUndefined
 from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE
+from pystream.utils.logger import LOGGER
 from pystream.utils.profiler import ProfilerHandler
 
 
@@ -174,7 +175,7 @@ class Pipeline:
             stage name
         """
         if self.profiler is None:
-            print("Profiler is not activated")
+            LOGGER.debug("Profiler is not activated")
             return {}, {}
         return self.profiler.summarize()
 
