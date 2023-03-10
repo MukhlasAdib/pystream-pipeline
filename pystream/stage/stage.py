@@ -5,9 +5,11 @@ from typing import Callable, TypeVar, Union
 T = TypeVar("T")
 
 
-class StageAbstract(ABC):
+class Stage(ABC):
     """Abstract class for the pipeline stage. All stage have to be
     cleaned up should be defined as a subclass of this class."""
+
+    name: str = ""
 
     @abstractmethod
     def __call__(self, data: T) -> T:
@@ -26,18 +28,6 @@ class StageAbstract(ABC):
         """Cleanup method for the stage. This method will be invoked
         during pipeline cleanup step"""
         pass
-
-    @property
-    @abstractmethod
-    def name(self) -> str:
-        """Name of the stage"""
-        pass
-
-
-class Stage(StageAbstract):
-    @property
-    def name(self) -> str:
-        return ""
 
 
 StageCallable = Union[Callable[[T], T], Stage]

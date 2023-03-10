@@ -15,7 +15,7 @@ def get_default_stage_name() -> str:
     return f"Stage_{_STAGE_COUNTER}"
 
 
-def check_stage_name(name: str) -> None:
+def check_invalid_stage_name(name: str) -> None:
     if "-" in name:
         raise InvalidStageName("Stage name cannot contain dash ('-')")
     if _PIPELINE_NAME_IN_PROFILE == name:
@@ -24,13 +24,22 @@ def check_stage_name(name: str) -> None:
         raise InvalidStageName(f"Stage name cannot be {_FINAL_STAGE_NAME}")
 
 
+def get_stage_name(name: Optional[str], stage: StageCallable) -> str:
+    if name is None:
+        if isinstance(stage, Stage) and stage.name != "":
+            name = stage.name
+        else:
+            name = get_default_stage_name()
+    check_invalid_stage_name(name)
+    return name
+
+
 class StageContainer(Stage):
     def __init__(self, stage: StageCallable, name: Optional[str] = None) -> None:
-        if name is None:
-            name = get_default_stage_name()
-        check_stage_name(name)
-        self._name = name
+        self._name = get_stage_name(name, stage)
         self.stage = stage
+        if isinstance(stage, Stage):
+            stage.name = self._name
 
     def __call__(self, data: PipelineData) -> PipelineData:
         data.profile.tick_start(self.name)
@@ -43,4 +52,8 @@ class StageContainer(Stage):
 
     @property
     def name(self) -> str:
-        return self._name
+        if isinstance(self.stage, Stage):
+            name = self.stage.name
+        else:
+            name = self._name
+        return name
