@@ -18,12 +18,20 @@ class TestStageContainer:
 
     def test_init(self):
         assert self.cont.name == self.name
+        assert self.stage.name == self.name
         with pytest.raises(InvalidStageName):
             cont = StageContainer(self.stage, "Test-Name")
         with pytest.raises(InvalidStageName):
             cont = StageContainer(self.stage, _PIPELINE_NAME_IN_PROFILE)
         with pytest.raises(InvalidStageName):
             cont = StageContainer(self.stage, _FINAL_STAGE_NAME)
+
+    def test_name_func(self):
+        def dummy_stage_func(x):
+            return x
+
+        cont = StageContainer(dummy_stage_func, self.name)
+        assert cont.name == self.name
 
     def test_call(self):
         data = PipelineData(data=[])
