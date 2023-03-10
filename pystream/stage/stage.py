@@ -6,13 +6,13 @@ T = TypeVar("T")
 
 
 class Stage(ABC):
-    """Abstract class for the pipeline stage. As an example, stages that
+    """Base class for the pipeline stage. As an example, stages that
     have a cleanup routine should be defined as a subclass of this class.
 
     Useful property:
         name (str): the stage name, if not defined by the child instance,
             the name will be assigned automatically after the pipeline
-            is constructed.
+            is constructed. Defaults to ""
     """
 
     name: str = ""
