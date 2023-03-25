@@ -5,9 +5,17 @@ from typing import Callable, TypeVar, Union
 T = TypeVar("T")
 
 
-class StageAbstract(ABC):
-    """Abstract class for the pipeline stage. All stage have to be
-    cleaned up should be defined as a subclass of this class."""
+class Stage(ABC):
+    """Base class for the pipeline stage. As an example, stages that
+    have a cleanup routine should be defined as a subclass of this class.
+
+    Useful property:
+        name (str): the stage name, if not defined by the child instance,
+            the name will be assigned automatically after the pipeline
+            is constructed. Defaults to ""
+    """
+
+    name: str = ""
 
     @abstractmethod
     def __call__(self, data: T) -> T:
@@ -26,18 +34,6 @@ class StageAbstract(ABC):
         """Cleanup method for the stage. This method will be invoked
         during pipeline cleanup step"""
         pass
-
-    @property
-    @abstractmethod
-    def name(self) -> str:
-        """Name of the stage"""
-        pass
-
-
-class Stage(StageAbstract):
-    @property
-    def name(self) -> str:
-        return ""
 
 
 StageCallable = Union[Callable[[T], T], Stage]
