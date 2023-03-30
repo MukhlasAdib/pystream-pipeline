@@ -174,7 +174,7 @@ class Pipeline:
             stage name
         """
         if self.profiler is None:
-            LOGGER.debug("Profiler is not activated")
+            LOGGER.error("Cannot get profiles because profiler is not activated")
             return {}, {}
         return self.profiler.summarize()
 

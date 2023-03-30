@@ -133,7 +133,7 @@ class StageThread(Thread):
         self.print_log(f"Thread terminated...")
 
     def print_log(self, msg: str) -> None:
-        LOGGER.info(f"({self.name} {get_ident()}) {msg}")
+        LOGGER.debug(f"({self.name} {get_ident()}) {msg}")
 
 
 class StagedThreadPipeline(PipelineBase):
