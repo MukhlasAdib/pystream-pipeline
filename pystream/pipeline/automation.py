@@ -9,7 +9,7 @@ from pystream.utils.errors import PipelineUndefined
 
 
 class InterfacePipelineProtocol(Protocol):
-    def forward(self, data: Any = _request_generator) -> bool:
+    def _push_pipeline_data(self, data: PipelineData) -> bool:
         ...
 
     def _generate_pipeline_data(self, data: Any = _request_generator) -> PipelineData:
@@ -42,6 +42,6 @@ class PipelineAutomation(Thread):
         while self._loop_is_start.is_set():
             last_update = time.time()
             data = self.pipeline._generate_pipeline_data()
-            self.pipeline.forward(data)
+            self.pipeline._push_pipeline_data(data)
             while time.time() - last_update < self._loop_period:
                 time.sleep(check_period)
