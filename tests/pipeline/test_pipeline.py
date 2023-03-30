@@ -113,6 +113,8 @@ class TestPipeline:
         assert self.pipeline._automation._loop_is_start.is_set()
         time.sleep(0.5)
         self.pipeline.stop_loop()
+        ret = self.pipeline.get_results()
+        assert ret == INPUT_GENERATOR_OUTPUT
         assert not self.pipeline._automation._loop_is_start.is_set()
 
     def test_generate_pipeline_data(self):
