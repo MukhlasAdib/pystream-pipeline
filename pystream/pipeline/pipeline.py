@@ -122,8 +122,7 @@ class Pipeline:
         if self.pipeline is None:
             raise PipelineUndefined("Pipeline has not been defined")
         pipeline_data = self._generate_pipeline_data(data)
-        pipeline_data.profile.tick_start(_PIPELINE_NAME_IN_PROFILE)
-        return self.pipeline.forward(pipeline_data)
+        return self._push_pipeline_data(pipeline_data)
 
     def start_loop(self, period: float = 0.01) -> None:
         """Start the pipeline in autonomous mode. Data generated
@@ -185,3 +184,10 @@ class Pipeline:
             return PipelineData(data=self._input_generator())
         else:
             return PipelineData(data=data)
+
+    def _push_pipeline_data(self, data: PipelineData) -> bool:
+        """Push the pipeline data into the pipeline"""
+        if self.pipeline is None:
+            raise PipelineUndefined("Pipeline has not been defined")
+        data.profile.tick_start(_PIPELINE_NAME_IN_PROFILE)
+        return self.pipeline.forward(data)

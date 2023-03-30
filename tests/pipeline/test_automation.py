@@ -12,7 +12,7 @@ class MockInterfacePipeline:
         self.data_hist = []
         self.data_count = 0
 
-    def forward(self, data=PipelineData(None)):
+    def _push_pipeline_data(self, data=PipelineData(None)):
         self.times.append(time.time())
         self.data_hist.append(data.data)
         return True
