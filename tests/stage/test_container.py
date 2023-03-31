@@ -16,6 +16,10 @@ def mock_default_name():
     return DEFAULT_NAME
 
 
+def dummy_stage_func(x):
+    return x
+
+
 class TestStageContainer:
     @pytest.fixture(autouse=True)
     def _init_stage(self, dummy_stage: Type[DummyStage]) -> None:
@@ -35,17 +39,6 @@ class TestStageContainer:
 
         self.stage.name = "TestName2"
         assert cont.name == self.stage.name
-
-    def test_name_func(self, monkeypatch):
-        def dummy_stage_func(x):
-            return x
-
-        monkeypatch.setattr(_container, "get_default_stage_name", mock_default_name)
-        cont = StageContainer(dummy_stage_func)
-        assert cont.name == DEFAULT_NAME
-
-        cont = StageContainer(dummy_stage_func, self.name)
-        assert cont.name == self.name
 
     def test_invalid_names(self):
         with pytest.raises(InvalidStageName):
@@ -67,3 +60,15 @@ class TestStageContainer:
         cont = StageContainer(self.stage, self.name)
         cont.cleanup()
         assert self.stage.val is None
+
+    def test_name_func(self, monkeypatch):
+        monkeypatch.setattr(_container, "get_default_stage_name", mock_default_name)
+        cont = StageContainer(dummy_stage_func)
+        assert cont.name == DEFAULT_NAME
+
+        cont = StageContainer(dummy_stage_func, self.name)
+        assert cont.name == self.name
+
+    def test_cleanup_func(self):
+        cont = StageContainer(dummy_stage_func)
+        cont.cleanup()
