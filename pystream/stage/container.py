@@ -48,7 +48,7 @@ class StageContainer(Stage):
         return data
 
     def cleanup(self) -> None:
-        if isinstance(self.stage, StageContainer):
+        if isinstance(self.stage, Stage):
             self.stage.cleanup()
 
     @property
