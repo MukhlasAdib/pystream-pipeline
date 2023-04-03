@@ -162,7 +162,10 @@ class PipelineTester:
             d = [k, profile[0][k], profile[1][k]]
             data.append(d)
         table = tabulate(
-            data, headers=["Stage", "Latency", "Throughput"], tablefmt="pipe"
+            data,
+            headers=["Stage", "Latency", "Throughput"],
+            tablefmt="pipe",
+            floatfmt=".3f",
         )
         write_to_file(table)
 
@@ -220,6 +223,7 @@ class PipelineTester:
             table_data,
             headers=["Metric", "Ideal (s)", "Actual (s)", "Deviation (%)"],
             tablefmt="pipe",
+            floatfmt=".3f",
         )
         write_to_file(table)
 
