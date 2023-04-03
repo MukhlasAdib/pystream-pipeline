@@ -101,44 +101,140 @@ def write_log(profile):
         logger.info(f"**{k}**: {v} data/s")
 
 
-def write_report(profile, title=None):
-    if title is not None:
-        write_to_file(title)
-
-    data = []
-    for k in profile[0].keys():
-        d = [k, profile[0][k], profile[1][k]]
-        data.append(d)
-    table = tabulate(data, headers=["Stage", "Latency", "Throughput"], tablefmt="pipe")
-    write_to_file(table)
-
-
 def run_one_mode(args):
     profile = run(args.num_stages, args.wait_time, args.mode)
     write_log(profile)
 
 
-def run_reporting(args):
-    write_to_file("# Profiling Report (Wait Test)")
-    write_to_file(f"Wait time: {args.wait_time} s")
-    write_to_file(f"Ideal pipeline latency: {args.wait_time * args.num_stages} s")
-    write_to_file(
-        f"Ideal pipeline serial throughput: {1 / (args.wait_time * args.num_stages)} data/s"
-    )
-    write_to_file(f"Ideal pipeline throughput: {1 / args.wait_time} data/s")
-    profile = run(args.num_stages, args.wait_time, "serial")
-    write_log(profile)
-    write_report(profile, "## Serial Pipeline")
-    profile = run(args.num_stages, args.wait_time, "thread")
-    write_log(profile)
-    write_report(profile, "## Threaded Pipeline")
+class PipelineTester:
+    def __init__(self, wait_time, num_stages):
+        self.wait_time = wait_time
+        self.num_stages = num_stages
+
+    def run_reporting(self):
+        write_to_file("# Profiling Report (Wait Test)")
+        write_to_file(f"Wait time: {self.wait_time} s")
+
+        self.report_serial()
+        self.report_parallel()
+
+    def report_serial(self):
+        profile = run(self.num_stages, self.wait_time, "serial")
+        write_log(profile)
+        write_to_file("## Serial Pipeline")
+
+        ideal_stage_throughput = 1 / (self.wait_time * self.num_stages)
+        ideal_pipeline_throughput = 1 / (self.wait_time * self.num_stages)
+        ideal_stage_latency = self.wait_time
+        ideal_pipeline_latency = self.wait_time * self.num_stages
+        self.write_report(profile)
+        self.write_analysis(
+            profile,
+            ideal_pipeline_throughput,
+            ideal_pipeline_latency,
+            ideal_stage_throughput,
+            ideal_stage_latency,
+        )
+
+    def report_parallel(self):
+        profile = run(self.num_stages, self.wait_time, "thread")
+        write_log(profile)
+        write_to_file("## Threaded Pipeline")
+
+        ideal_stage_throughput = 1 / self.wait_time
+        ideal_stage_latency = self.wait_time
+        ideal_pipeline_throughput = 1 / self.wait_time
+        ideal_pipeline_latency = self.wait_time * self.num_stages
+        self.write_report(profile)
+        self.write_analysis(
+            profile,
+            ideal_pipeline_throughput,
+            ideal_pipeline_latency,
+            ideal_stage_throughput,
+            ideal_stage_latency,
+        )
+
+    def write_report(self, profile):
+        data = []
+        for k in profile[0].keys():
+            d = [k, profile[0][k], profile[1][k]]
+            data.append(d)
+        table = tabulate(
+            data, headers=["Stage", "Latency", "Throughput"], tablefmt="pipe"
+        )
+        write_to_file(table)
+
+    def write_analysis(
+        self,
+        profile,
+        ideal_pipeline_throughput,
+        ideal_pipeline_latency,
+        ideal_stage_throughput,
+        ideal_stage_latency,
+    ):
+        latency = profile[0]
+        throughput = profile[1]
+
+        sum_val = 0
+        for k in throughput.keys():
+            if k == "Pipeline":
+                continue
+            sum_val += throughput[k]
+        actual_stage_throughput = sum_val / (len(throughput) - 1)
+        actual_pipeline_throughput = throughput["Pipeline"]
+
+        sum_val = 0
+        for k in latency.keys():
+            if k == "Pipeline":
+                continue
+            sum_val += latency[k]
+        actual_stage_latency = sum_val / (len(latency) - 1)
+        actual_pipeline_latency = latency["Pipeline"]
+
+        table_data = [
+            self.create_row(
+                "Stage latency", ideal_stage_latency, actual_stage_latency, rev=True
+            ),
+            self.create_row(
+                "Stage throughput",
+                ideal_stage_throughput,
+                actual_stage_throughput,
+                rev=False,
+            ),
+            self.create_row(
+                "Pipeline latency",
+                ideal_pipeline_latency,
+                actual_pipeline_latency,
+                rev=True,
+            ),
+            self.create_row(
+                "Pipeline throughput",
+                ideal_pipeline_throughput,
+                actual_pipeline_throughput,
+                rev=False,
+            ),
+        ]
+        table = tabulate(
+            table_data,
+            headers=["Metric", "Ideal (s)", "Actual (s)", "Deviation (%)"],
+            tablefmt="pipe",
+        )
+        write_to_file(table)
+
+    def create_row(self, name, ideal_val, actual_val, rev=True):
+        if rev:
+            err = (actual_val - ideal_val) / actual_val * 100
+        else:
+            err = (ideal_val - actual_val) / ideal_val * 100
+        return [name, ideal_val, actual_val, err]
 
 
 def main(args):
     if args.mode != "report":
         run_one_mode(args)
     else:
-        run_reporting(args)
+        tester = PipelineTester(args.wait_time, args.num_stages)
+        tester.run_reporting()
 
 
 if __name__ == "__main__":
