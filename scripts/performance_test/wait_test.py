@@ -30,7 +30,9 @@ class WaitStage(Stage):
         self.wait = wait
 
     def __call__(self, data: list) -> list:
-        time.sleep(self.wait)
+        start = time.time()
+        while (time.time() - start) < self.wait:
+            time.sleep(self.wait / 10)
         return data
 
     def cleanup(self) -> None:
