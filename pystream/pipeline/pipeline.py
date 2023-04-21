@@ -25,7 +25,7 @@ class Pipeline:
             used to generate input data if you want the pipeline to run autonomously.
             If None, the input needs to be given by invoking "forward" method.
             Defaults to None.
-        use_profiles (bool, optional): Whether to implement profiler to the pipeline.
+        use_profiler (bool, optional): Whether to implement profiler to the pipeline.
             Defaults to False.
     """
 
@@ -87,8 +87,8 @@ class Pipeline:
 
         Args:
             block_input (bool, optional): Whether to set the forward method
-                into blocking mode with the specified timeout in input_timeout.
-                Defaults to True.
+                into blocking mode if the first stage is busy with the specified
+                timeout in input_timeout. Defaults to True.
             input_timeout (float, optional): Blocking timeout for the forward
                 method in seconds. Defaults to 10.
 

@@ -5,7 +5,6 @@ In general, PyStream provides a set of tools to build a data pipeline, especiall
 The data pipeline here can include, for example, an IOT data processing, computer vision at edge, cloud data tabular data analytics, or any other that you can think of. 
 These tools will make it easier for you to manage your pipeline, without having to worry about operational stuffs like the data passing and the structure of the pipeline itself.
 One important feature that PyStream has provides is the ability to turn your pipeline operation into a parallel operation (through multithreading or multiprocessing).
-By parallel we mean here is more than what we usually do with other modules such as ``ThreadPoolExecutor``.
 Depends on the operations you have, you will be able to boost the speed and throughput of your data processing pipeline several times better than when you run it in step-by-step fashion.
 
 A PyStream **pipeline** is made of several **stages** that are linked together.  
@@ -16,7 +15,7 @@ This is the standard mode of building pipeline with PyStream.
 Whereas in functional pipeline, the pipeline is stored as a function and you need to invoke it to make it process your data.
 This mode is intended for intermittent operations or as a sub-pipeline that can be operated inside staged pipeline.
 
-You can directly check the `demo script <https://github.com/MukhlasAdib/pystream-pipeline/blob/master/demo_pipeline.py>`_ of PyStream to see how this package is used.
+You can directly check the `demo script <https://github.com/MukhlasAdib/pystream-pipeline/blob/main/demo.ipynb>`_ of PyStream to see how this package is used.
 Please visit the `API documentation <https://pystream-pipeline.readthedocs.io/en/latest/api.html>`_ for more detailed information.
 
 Staged Pipeline
@@ -37,19 +36,21 @@ With PyStream, a stage can be in form of a class instance or a function:
 
 If you made it as a class instance you need to make the class inherit from ``pystream.Stage`` abstract class.
 For now, the methods that need to be defined are ``__call__`` and ``cleanup``.
+You can also set the ``name`` property of the class to set the registered name for the stage.
 See the API documentation to check what methods and interface need to be defined when inherit from it.
 
 If you want to make it as a function then you only need to make a callable that only takes one argument, which is the data to be processed.
 The function also has to return one value, which is the resulted data.
 
 You can use class instance as a stage without having to inherit from ``pystream.Stage``, by defining its ``__call__`` method.
-However the main advantage when inherit from ``pystream.Stage`` is that  the pipeline will invoke its ``cleanup`` method when the pipeline is in cleanup step.
+However the main advantage when inherit from ``pystream.Stage`` the pipeline will invoke its ``cleanup`` method when the pipeline is in cleanup step.
 
 For example, we have a dummy data processing stage that only waits for 0.1 second and increment the integer input data by 1.
 In the class form, it will be something like this::
 
     class DummyStage(pystream.Stage):
-        def __init__(self):
+        def __init__(self, name: str) -> None:
+            self.name = name
             self.wait = 0.1
 
         def __call__(self, data: int) -> int:
@@ -68,7 +69,7 @@ In functional form, you can just use ``DummyStage()`` as your callable function,
         print(data)
         return data + 1
 
-1. Build the pipeline
+2. Build the pipeline
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 After you have defined your stages, then you only need to make a pipeline from them by using ``pystream.Pipeline`` class.
@@ -80,11 +81,11 @@ Here is a sample of a pipeline creation where you want the input to be ``0`` int
 
     pipeline = pystream.Pipeline(input_generator=lambda: 0)
 
-Then, let's add some stages by using ``add`` method::
+Then, let's add some stages by using ``add`` method with an optional ``name`` argument to set the stage name::
 
-    pipeline.add(DummyStage()) # stage 1
-    pipeline.add(DummyStage()) # stage 2
-    pipeline.add(dummy_stage) # stage 3
+    pipeline.add(DummyStage(), name="Stage_1") # stage 1
+    pipeline.add(DummyStage(), name="Stage_2") # stage 2
+    pipeline.add(dummy_stage, name="Stage_3") # stage 3
 
 3. Choose operation mode
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -129,6 +130,11 @@ If it has not been finished, you will get ``None`` instead (for parallel mode).
 
 If you want to shutdown the pipeline, then just call ``pipeline.cleanup()``. It will invoke the ``cleanup`` method of all the stages.
 If the pipeline is in autonomous operation mode, you need to stop the input generator by calling ``pipeline.stop_loop()``.
+
+On the other hand, we provide a built-in pipeline profiler that can measure your pipeline's latency and throughput.
+The profiler can be activated by specifying ``use_profiler`` to True when instantiating ``pystream.Pipeline``.
+To get the pipeline profiles, use ``get_profiles`` method of ``pystream.Pipeline``.
+For examples, please check ``demo.ipynb``.
 
 Functional Pipeline
 --------------------------------------
