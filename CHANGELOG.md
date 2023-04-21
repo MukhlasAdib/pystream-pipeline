@@ -2,6 +2,16 @@
 
 ## Released
 
+### v0.1.3
+
+- [x] Add built-in pipeline profiling feature.
+- [x] `forward` method of `pystream.Pipeline` have default value: the flag to use input generator
+- [x] Well-explained sample usage of the demo in `.ipynb` format.
+- [x] Unit tests for staged pipeline operations.
+- [x] Unit tests for functional pipeline operations.
+- [x] Use logger instead of print
+- [x] Specify stage name
+
 ### v0.1.2
 
 - [x] Option to use blocking pipeline input for parallel pipeline.
@@ -28,16 +38,6 @@
   - [x] Documentation in `docs` about basic API.
 
 ## On-going
-
-### v0.1.3
-
-- [x] Add built-in pipeline profiling feature.
-- [x] `forward` method of `pystream.Pipeline` have default value: the flag to use input generator
-- [x] Well-explained sample usage of the demo in `.ipynb` format.
-- [x] Unit tests for staged pipeline operations.
-- [x] Unit tests for functional pipeline operations.
-- [x] Use logger instead of print
-- [x] Specify stage name
 
 ### v0.1.4
 
