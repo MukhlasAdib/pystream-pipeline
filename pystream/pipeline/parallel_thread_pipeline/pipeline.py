@@ -1,22 +1,22 @@
-from dataclasses import dataclass
 from queue import Empty, Full, Queue
 from threading import Event, get_ident, Thread
 import time
 from typing import List, Optional
 
 from pystream.data.pipeline_data import PipelineData
+from pystream.data.stage_data import StageLinks, StageQueueProtocol
 from pystream.pipeline.pipeline_base import PipelineBase
+from pystream.pipeline.utils.profiler import ProfilerHandler
 from pystream.stage.container import StageContainer
 from pystream.stage.final_stage import FinalStage
 from pystream.stage.stage import Stage, StageCallable
 from pystream.utils.errors import PipelineTerminated
 from pystream.utils.logger import LOGGER
-from pystream.utils.profiler import ProfilerHandler
 
 
 def send_output(
     data: PipelineData,
-    output_queue: Queue,
+    output_queue: StageQueueProtocol,
     block: bool = True,
     replace: bool = False,
     timeout: float = 10,
@@ -49,20 +49,6 @@ def send_output(
             return False
     else:
         return True
-
-
-@dataclass
-class StageLinks:
-    """Dataclass for links between stages."""
-
-    # Queue for input data
-    input_queue: Queue
-    # Queue for output data
-    output_queue: Queue
-    # Event to stop the stage
-    stopper: Event
-    # Event to signal the stage is ready
-    starter: Event
 
 
 class StageThread(Thread):
@@ -136,7 +122,7 @@ class StageThread(Thread):
         LOGGER.debug(f"({self.name} {get_ident()}) {msg}")
 
 
-class StagedThreadPipeline(PipelineBase):
+class ParallelThreadPipeline(PipelineBase):
     def __init__(
         self,
         stages: List[StageCallable],

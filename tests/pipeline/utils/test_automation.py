@@ -3,7 +3,7 @@ import time
 import pytest
 
 from pystream.data.pipeline_data import PipelineData
-from pystream.pipeline.automation import PipelineAutomation
+from pystream.pipeline.utils.automation import PipelineAutomation
 
 
 class MockInterfacePipeline:
