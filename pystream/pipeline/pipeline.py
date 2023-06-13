@@ -6,7 +6,7 @@ from pystream.data.pipeline_data import (
     PipelineData,
     _request_generator,
 )
-from pystream.pipeline.automation import PipelineAutomation
+from pystream.utils.pipeline_automation import PipelineAutomation
 from pystream.pipeline.pipeline_base import PipelineBase
 from pystream.stage.stage import StageCallable
 from pystream.pipeline import SerialPipeline
