@@ -9,8 +9,8 @@ from pystream.data.pipeline_data import (
 from pystream.pipeline.automation import PipelineAutomation
 from pystream.pipeline.pipeline_base import PipelineBase
 from pystream.stage.stage import StageCallable
-from pystream.pipeline.serial_pipeline.pipeline import SerialPipeline
-from pystream.pipeline.parallel_thread_pipeline.pipeline import StagedThreadPipeline
+from pystream.pipeline import SerialPipeline
+from pystream.pipeline import ParallelThreadPipeline
 from pystream.utils.errors import PipelineUndefined
 from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE
 from pystream.utils.logger import LOGGER
@@ -95,7 +95,7 @@ class Pipeline:
         Returns:
             Pipeline: this pipeline itself
         """
-        self.pipeline = StagedThreadPipeline(
+        self.pipeline = ParallelThreadPipeline(
             self.stages_sequence,
             self.stage_names,
             block_input=block_input,

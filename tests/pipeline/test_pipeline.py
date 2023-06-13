@@ -3,8 +3,8 @@ import time
 import pytest
 
 from pystream import Pipeline
-from pystream.pipeline.serial_pipeline.pipeline import SerialPipeline
-from pystream.pipeline.parallel_thread_pipeline.pipeline import StagedThreadPipeline
+from pystream.pipeline import SerialPipeline
+from pystream.pipeline import ParallelThreadPipeline
 from pystream.pipeline.pipeline import PipelineUndefined
 from pystream.pipeline.pipeline_base import PipelineBase
 from pystream.data.pipeline_data import PipelineData
@@ -59,7 +59,7 @@ class TestPipeline:
         for _ in range(3):
             self.pipeline.add(dummy_stage())
         self.pipeline.parallelize()
-        assert isinstance(self.pipeline.pipeline, StagedThreadPipeline)
+        assert isinstance(self.pipeline.pipeline, ParallelThreadPipeline)
 
     def test_forward(self):
         self.pipeline.pipeline = MockPipeline()

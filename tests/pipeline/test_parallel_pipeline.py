@@ -7,7 +7,7 @@ import pytest
 from pystream.data.pipeline_data import PipelineData
 from pystream.pipeline.parallel_thread_pipeline.pipeline import (
     StageLinks,
-    StagedThreadPipeline,
+    ParallelThreadPipeline,
     StageThread,
     send_output,
 )
@@ -116,7 +116,7 @@ class TestStageThread:
         assert self.stage.stage.val is None  # type: ignore
 
 
-class TestStagedThreadPipeline:
+class TestParallelThreadPipeline:
     @pytest.fixture(autouse=True)
     def _create_pipeline(self, dummy_stage):
         self.num_stages = 5
@@ -127,7 +127,7 @@ class TestStagedThreadPipeline:
             name = f"Sample_{i}"
             self.names.append(name)
         self.profiler = ProfilerHandler()
-        self.pipeline = StagedThreadPipeline(
+        self.pipeline = ParallelThreadPipeline(
             self.stages, self.names, profiler_handler=self.profiler
         )
 

@@ -122,7 +122,7 @@ class StageThread(Thread):
         LOGGER.debug(f"({self.name} {get_ident()}) {msg}")
 
 
-class StagedThreadPipeline(PipelineBase):
+class ParallelThreadPipeline(PipelineBase):
     def __init__(
         self,
         stages: List[StageCallable],
