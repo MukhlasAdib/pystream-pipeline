@@ -3,7 +3,7 @@ import time
 import pytest
 
 from pystream import Pipeline
-from pystream.pipeline.serial_pipeline import SerialPipeline
+from pystream.pipeline.serial_pipeline.pipeline import SerialPipeline
 from pystream.pipeline.parallel_thread_pipeline.pipeline import StagedThreadPipeline
 from pystream.pipeline.pipeline import PipelineUndefined
 from pystream.pipeline.pipeline_base import PipelineBase
