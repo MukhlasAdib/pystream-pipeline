@@ -166,13 +166,13 @@ class ParallelThreadPipeline(PipelineBase):
         self.starter = Event()
         # The first stage's input is the output
         # of the pipeline handler
-        input_queue = Queue[PipelineData](maxsize=1)
+        input_queue = Queue(maxsize=1)
         self.main_output_queue = input_queue
         self.stage_threads: List[StageThread] = []
         self.stage_links: List[StageLinks] = []
         # Create the stage threars one by one along with the links
         for _, stage in enumerate(self.stages):
-            output_queue = Queue[PipelineData](maxsize=1)
+            output_queue = Queue(maxsize=1)
             links = StageLinks(
                 input_queue=input_queue,
                 output_queue=output_queue,
