@@ -10,7 +10,7 @@ from pystream.pipeline.automation import PipelineAutomation
 from pystream.pipeline.pipeline_base import PipelineBase
 from pystream.stage.stage import StageCallable
 from pystream.pipeline.serial_pipeline import SerialPipeline
-from pystream.pipeline.parallel_pipeline import StagedThreadPipeline
+from pystream.pipeline.parallel_thread_pipeline.pipeline import StagedThreadPipeline
 from pystream.utils.errors import PipelineUndefined
 from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE
 from pystream.utils.logger import LOGGER

@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from queue import Empty, Full, Queue
 from threading import Event, get_ident, Thread
 import time

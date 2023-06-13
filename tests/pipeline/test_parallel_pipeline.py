@@ -5,7 +5,7 @@ import time
 import pytest
 
 from pystream.data.pipeline_data import PipelineData
-from pystream.pipeline.parallel_pipeline import (
+from pystream.pipeline.parallel_thread_pipeline.pipeline import (
     StageLinks,
     StagedThreadPipeline,
     StageThread,
