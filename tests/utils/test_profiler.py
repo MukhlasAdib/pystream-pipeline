@@ -6,9 +6,9 @@ from typing import Dict, List, Tuple
 import pandas as pd
 import pytest
 
-import pystream.utils.profiler as _profiler
+import pystream.pipeline.utils.profiler as _profiler
 from pystream.data.pipeline_data import ProfileData
-from pystream.utils.profiler import ProfileDBHandler, ProfilerHandler
+from pystream.pipeline.utils.profiler import ProfileDBHandler, ProfilerHandler
 
 
 def generate_test_profile_data(

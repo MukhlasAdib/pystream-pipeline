@@ -11,10 +11,11 @@ from pystream.pipeline.parallel_thread_pipeline.pipeline import (
     StageThread,
     send_output,
 )
+from pystream.pipeline.utils.profiler import ProfilerHandler
 from pystream.stage.container import StageContainer
 from pystream.utils.errors import PipelineTerminated
 from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE
-from pystream.utils.profiler import ProfilerHandler
+
 
 
 def test_send_output():

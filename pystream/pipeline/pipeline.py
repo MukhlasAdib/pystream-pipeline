@@ -6,15 +6,15 @@ from pystream.data.pipeline_data import (
     PipelineData,
     _request_generator,
 )
-from pystream.utils.pipeline_automation import PipelineAutomation
-from pystream.pipeline.pipeline_base import PipelineBase
-from pystream.stage.stage import StageCallable
 from pystream.pipeline import SerialPipeline
 from pystream.pipeline import ParallelThreadPipeline
+from pystream.pipeline.pipeline_base import PipelineBase
+from pystream.pipeline.utils.automation import PipelineAutomation
+from pystream.pipeline.utils.profiler import ProfilerHandler
+from pystream.stage.stage import StageCallable
 from pystream.utils.errors import PipelineUndefined
 from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE
 from pystream.utils.logger import LOGGER
-from pystream.utils.profiler import ProfilerHandler
 
 
 class Pipeline:

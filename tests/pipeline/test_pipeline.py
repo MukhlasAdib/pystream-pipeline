@@ -7,9 +7,9 @@ from pystream.pipeline import SerialPipeline
 from pystream.pipeline import ParallelThreadPipeline
 from pystream.pipeline.pipeline import PipelineUndefined
 from pystream.pipeline.pipeline_base import PipelineBase
+from pystream.pipeline.utils.profiler import ProfilerHandler
 from pystream.data.pipeline_data import PipelineData
 from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE
-from pystream.utils.profiler import ProfilerHandler
 
 
 class MockPipeline(PipelineBase):

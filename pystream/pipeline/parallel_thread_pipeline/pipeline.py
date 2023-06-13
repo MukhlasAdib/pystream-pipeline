@@ -6,12 +6,12 @@ from typing import List, Optional
 from pystream.data.pipeline_data import PipelineData
 from pystream.data.stage_data import StageLinks, StageQueueProtocol
 from pystream.pipeline.pipeline_base import PipelineBase
+from pystream.pipeline.utils.profiler import ProfilerHandler
 from pystream.stage.container import StageContainer
 from pystream.stage.final_stage import FinalStage
 from pystream.stage.stage import Stage, StageCallable
 from pystream.utils.errors import PipelineTerminated
 from pystream.utils.logger import LOGGER
-from pystream.utils.profiler import ProfilerHandler
 
 
 def send_output(

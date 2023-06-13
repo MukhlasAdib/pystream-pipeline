@@ -2,8 +2,8 @@ import pytest
 
 from pystream.data.pipeline_data import PipelineData
 from pystream.pipeline.serial_pipeline.pipeline import SerialPipeline
+from pystream.pipeline.utils.profiler import ProfilerHandler
 from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE
-from pystream.utils.profiler import ProfilerHandler
 
 
 class TestSerialPipeline:

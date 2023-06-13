@@ -1,11 +1,11 @@
 from typing import List, Optional
 
 from pystream.data.pipeline_data import PipelineData
+from pystream.pipeline.pipeline_base import PipelineBase
+from pystream.pipeline.utils.profiler import ProfilerHandler
 from pystream.stage.container import StageContainer
 from pystream.stage.final_stage import FinalStage
 from pystream.stage.stage import Stage, StageCallable
-from pystream.pipeline.pipeline_base import PipelineBase
-from pystream.utils.profiler import ProfilerHandler
 
 
 class SerialPipeline(PipelineBase):
