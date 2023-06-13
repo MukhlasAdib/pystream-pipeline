@@ -5,6 +5,7 @@ import time
 from typing import List, Optional
 
 from pystream.data.pipeline_data import PipelineData
+from pystream.data.stage_data import StageLinks, StageQueueProtocol
 from pystream.pipeline.pipeline_base import PipelineBase
 from pystream.stage.container import StageContainer
 from pystream.stage.final_stage import FinalStage
@@ -16,7 +17,7 @@ from pystream.utils.profiler import ProfilerHandler
 
 def send_output(
     data: PipelineData,
-    output_queue: Queue,
+    output_queue: StageQueueProtocol,
     block: bool = True,
     replace: bool = False,
     timeout: float = 10,
@@ -49,20 +50,6 @@ def send_output(
             return False
     else:
         return True
-
-
-@dataclass
-class StageLinks:
-    """Dataclass for links between stages."""
-
-    # Queue for input data
-    input_queue: Queue
-    # Queue for output data
-    output_queue: Queue
-    # Event to stop the stage
-    stopper: Event
-    # Event to signal the stage is ready
-    starter: Event
 
 
 class StageThread(Thread):
@@ -180,13 +167,13 @@ class StagedThreadPipeline(PipelineBase):
         self.starter = Event()
         # The first stage's input is the output
         # of the pipeline handler
-        input_queue = Queue(maxsize=1)
+        input_queue = Queue[PipelineData](maxsize=1)
         self.main_output_queue = input_queue
         self.stage_threads: List[StageThread] = []
         self.stage_links: List[StageLinks] = []
         # Create the stage threars one by one along with the links
         for _, stage in enumerate(self.stages):
-            output_queue = Queue(maxsize=1)
+            output_queue = Queue[PipelineData](maxsize=1)
             links = StageLinks(
                 input_queue=input_queue,
                 output_queue=output_queue,
