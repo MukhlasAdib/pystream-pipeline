@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 import pystream.pipeline.utils.profiler as _profiler
-from pystream.data.pipeline_data import ProfileData
+from pystream.data.profiler_data import ProfileData
 from pystream.pipeline.utils.profiler import ProfileDBHandler, ProfilerHandler
 
 

@@ -6,7 +6,7 @@ import os
 import pandas as pd
 
 from pystream.utils.general import _PYSTREAM_DIR
-from pystream.data.pipeline_data import ProfileData
+from pystream.data.profiler_data import ProfileData
 
 
 class ProfileDBHandler:

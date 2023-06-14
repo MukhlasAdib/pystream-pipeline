@@ -1,6 +1,7 @@
 from typing import Optional, Protocol
 
-from pystream.data.pipeline_data import PipelineData, ProfileData
+from pystream.data.pipeline_data import PipelineData
+from pystream.data.profiler_data import ProfileData
 from pystream.stage.stage import Stage
 from pystream.utils.general import _FINAL_STAGE_NAME, _PIPELINE_NAME_IN_PROFILE
 
