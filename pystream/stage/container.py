@@ -35,8 +35,9 @@ def get_stage_name(name: Optional[str], stage: StageCallable) -> str:
 
 
 class StageContainer(Stage):
-    def __init__(self, stage: StageCallable, name: Optional[str] = None) -> None:
+    def __init__(self, stage: StageCallable, parent_pipeline: str, name: Optional[str] = None) -> None:
         self._name = get_stage_name(name, stage)
+        self.parent_pipeline = parent_pipeline
         self.stage = stage
         if isinstance(stage, Stage):
             stage.name = self._name
@@ -44,7 +45,7 @@ class StageContainer(Stage):
     def __call__(self, data: PipelineData) -> PipelineData:
         data.profile.tick_start(self.name)
         data.data = self.stage(data.data)
-        data.profile.tick_end(self.name)
+        data.profile.tick_end()
         return data
 
     def cleanup(self) -> None:

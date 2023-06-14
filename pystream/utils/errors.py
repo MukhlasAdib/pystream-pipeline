@@ -8,3 +8,7 @@ class PipelineTerminated(Exception):
 
 class InvalidStageName(ValueError):
     pass
+
+
+class ProfilingError(ValueError):
+    pass
