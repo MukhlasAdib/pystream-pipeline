@@ -10,6 +10,7 @@ import pytest
 import pystream.pipeline.utils.profiler as _profiler
 from pystream.data.profiler_data import ProfileData, TimeProfileData
 from pystream.pipeline.utils.profiler import ProfileDBHandler, ProfilerHandler
+from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE
 
 
 def generate_test_profile_data(
@@ -150,5 +151,8 @@ class TestProfilerHandler:
         assert len(latencies) == num_stages + 1
         assert len(throughputs) == num_stages + 1
         for k in latencies.keys():
-            assert pytest.approx(latencies[k], rel=0.001) == latency
+            if k == _PIPELINE_NAME_IN_PROFILE:
+                assert pytest.approx(latencies[k], rel=0.001) == latency * num_stages
+            else:
+                assert pytest.approx(latencies[k], rel=0.001) == latency
             assert pytest.approx(throughputs[k], rel=0.001) == throughput
