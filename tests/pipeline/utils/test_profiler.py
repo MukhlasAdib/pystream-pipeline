@@ -1,7 +1,7 @@
 import os
 import sqlite3
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -10,7 +10,38 @@ import pytest
 import pystream.pipeline.utils.profiler as _profiler
 from pystream.data.profiler_data import ProfileData, TimeProfileData
 from pystream.pipeline.utils.profiler import ProfileDBHandler, ProfilerHandler
-from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE
+from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE, _PROFILE_LEVEL_SEPARATOR
+
+
+def generate_one_cycle_test_profile_data(
+    main_time_data: TimeProfileData,
+    num_stages: int = 5,
+    latency: float = 0.5,
+    base_time: float = 100,
+    base_name: str = "",
+    substage_idx: int = -1,
+    num_substages: int = 3
+):
+    current = base_time
+    main_time_data.started = current
+    for i in range(num_stages):
+        stage_name = f"{base_name}{i}"
+        time_data = TimeProfileData()
+        time_data.started = current
+        if i == substage_idx:
+            _, current = generate_one_cycle_test_profile_data(
+                time_data,
+                num_stages=num_substages,
+                latency=latency,
+                base_time=current,
+                base_name=f"{i}",
+            )
+        else:
+            current += latency
+        time_data.ended = current
+        main_time_data.substage[stage_name] = time_data 
+    main_time_data.ended = current
+    return main_time_data, current
 
 
 def generate_test_profile_data(
@@ -19,22 +50,22 @@ def generate_test_profile_data(
     latency: float = 0.5,
     throughput: float = 4,
     base_time: float = 100,
+    substage_idx: int = 2,
+    num_substages: int = 3,
 ) -> List[ProfileData]:
     current_base = base_time
-    stages_name = [f"Stage{chr(i + 65)}" for i in range(num_stages)]
     data = []
     for _ in range(num_data):
         current_base += 1 / throughput
-        current = current_base
         main_time_data = TimeProfileData(started=current_base)
-        main_time_data.started = current
-        for stage in stages_name:
-            time_data = TimeProfileData()
-            time_data.started = current
-            current += latency
-            time_data.ended = current
-            main_time_data.substage[stage] = time_data 
-        main_time_data.ended = current
+        generate_one_cycle_test_profile_data(
+            main_time_data=main_time_data,
+            num_stages=num_stages,
+            latency=latency,
+            base_time=current_base,
+            substage_idx=substage_idx,
+            num_substages=num_substages,
+        )
         data.append(ProfileData(main_time_data))
     return data
 
@@ -45,7 +76,7 @@ def generate_test_latency_and_throughput_dict(
     latency: float = 0.5,
     throughput: float = 4,
 ) -> Tuple[List[List[str]], List[np.ndarray], List[np.ndarray]]:
-    names_data = [f"Stage{chr(i + 65)}" for i in range(num_stages)]
+    names_data = [f"{i}" for i in range(num_stages)]
     latency_data = np.array([latency for _ in range(num_stages)])
     throughput_data = np.array([throughput for _ in range(num_stages)])
     return (
@@ -83,6 +114,7 @@ class TestProfileDBHandler:
         throughput = 10
         num_data = 4
         num_stages = 5
+
         names, latencies, throughputs = generate_test_latency_and_throughput_dict(
             num_data=num_data,
             num_stages=num_stages,
@@ -127,11 +159,16 @@ class TestProfilerHandler:
         num_stages = 7
         latency = 0.5
         throughput = 6.8
+        substage_idx = 2
+        num_substages= 3
+
         data = generate_test_profile_data(
             num_data=num_data,
             num_stages=num_stages,
             latency=latency,
             throughput=throughput,
+            substage_idx=substage_idx,
+            num_substages=num_substages
         )
 
         for d in data:
@@ -148,11 +185,14 @@ class TestProfilerHandler:
                 assert table_df.shape[0] == num_data - 1
 
         latencies, throughputs = self.profiler_handler.summarize()
-        assert len(latencies) == num_stages + 1
-        assert len(throughputs) == num_stages + 1
+        assert len(latencies) == num_stages + 1 + num_substages
+        assert len(throughputs) == num_stages + 1 + num_substages
         for k in latencies.keys():
+            assert k.startswith(_PIPELINE_NAME_IN_PROFILE)
             if k == _PIPELINE_NAME_IN_PROFILE:
-                assert pytest.approx(latencies[k], rel=0.001) == latency * num_stages
+                assert pytest.approx(latencies[k], rel=0.001) == latency * (num_stages + num_substages - 1)
+            elif k == f"{_PIPELINE_NAME_IN_PROFILE}{_PROFILE_LEVEL_SEPARATOR}{substage_idx}":
+                assert pytest.approx(latencies[k], rel=0.001) == latency * num_substages
             else:
                 assert pytest.approx(latencies[k], rel=0.001) == latency
             assert pytest.approx(throughputs[k], rel=0.001) == throughput

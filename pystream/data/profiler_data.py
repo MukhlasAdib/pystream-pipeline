@@ -19,7 +19,7 @@ class TimeProfileData:
         for stage_name, stage_data in self.substage.items():
             sub_name_data, sub_start_data, sub_end_data = stage_data.flatten()
             sub_name_data = [
-                f"{_PROFILE_LEVEL_SEPARATOR}{stage_name}{_PROFILE_LEVEL_SEPARATOR}{name}"
+                f"{_PROFILE_LEVEL_SEPARATOR}{stage_name}{name}"
                 if name != f"{_PROFILE_LEVEL_SEPARATOR}"
                 else f"{_PROFILE_LEVEL_SEPARATOR}{stage_name}"
                 for name in sub_name_data
