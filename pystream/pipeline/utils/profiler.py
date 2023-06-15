@@ -149,7 +149,7 @@ class ProfilerHandler:
             raise ProfilingError("Found a None in a profile start record")
         if None in end_data:
             raise ProfilingError("Found a None in a profile end record")
-        name_data = [_PIPELINE_NAME_IN_PROFILE + name for name in name_data]
+        name_data = [_PIPELINE_NAME_IN_PROFILE + name if name != "__" else _PIPELINE_NAME_IN_PROFILE for name in name_data]
         return name_data, np.array(start_data), np.array(end_data)
 
     def _calculate_latency(
