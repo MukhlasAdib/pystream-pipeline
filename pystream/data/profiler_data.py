@@ -45,17 +45,18 @@ class ProfileData:
     current_stages: List[str] = field(default_factory=list)
 
     def tick_start(self, name: str):
-        self.current_stages.append(name)
-        if name == _PIPELINE_NAME_IN_PROFILE and len(self.current_stages) == 1:
+        if name == _PIPELINE_NAME_IN_PROFILE:
             time_data = self.data
         else:
+            self.current_stages.append(name)
             time_data = find_time_data(self.data, self.current_stages)
         time_data.started = time.perf_counter()
 
     def tick_end(self):
-        if len(self.current_stages) == 1:
+        if len(self.current_stages) == 0:
             time_data = self.data
         else:
             time_data = find_time_data(self.data, self.current_stages)
+            self.current_stages.pop(-1)
         time_data.ended = time.perf_counter()
-        self.current_stages.pop(-1)
+        

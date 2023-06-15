@@ -3,7 +3,7 @@ import pytest
 from pystream.data.pipeline_data import PipelineData
 from pystream.pipeline.serial_pipeline.pipeline import SerialPipeline
 from pystream.pipeline.utils.profiler import ProfilerHandler
-from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE
+from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE, _PROFILE_LEVEL_SEPARATOR
 
 
 class TestSerialPipeline:
@@ -45,8 +45,9 @@ class TestSerialPipeline:
         assert len(latency) == self.num_stages + 1
         assert len(throughput) == self.num_stages + 1
         for name in self.names:
-            assert name in latency
-            assert name in throughput
+            level_name = f"{_PIPELINE_NAME_IN_PROFILE}{_PROFILE_LEVEL_SEPARATOR}{name}"
+            assert level_name in latency
+            assert level_name in throughput
         assert _PIPELINE_NAME_IN_PROFILE in latency
         assert _PIPELINE_NAME_IN_PROFILE in throughput
         for lat, fps in zip(latency.values(), throughput.values()):
