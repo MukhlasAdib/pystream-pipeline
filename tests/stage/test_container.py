@@ -44,6 +44,12 @@ class TestStageContainer:
         with pytest.raises(InvalidStageName):
             cont = StageContainer(self.stage, "Test-Name")
         with pytest.raises(InvalidStageName):
+            cont = StageContainer(self.stage, "Test__Name")
+        with pytest.raises(InvalidStageName):
+            cont = StageContainer(self.stage, "_TestName")
+        with pytest.raises(InvalidStageName):
+            cont = StageContainer(self.stage, "TestName_")
+        with pytest.raises(InvalidStageName):
             cont = StageContainer(self.stage, _PIPELINE_NAME_IN_PROFILE)
         with pytest.raises(InvalidStageName):
             cont = StageContainer(self.stage, _FINAL_STAGE_NAME)
