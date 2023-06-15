@@ -2,7 +2,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
-from pystream.utils.general import _PROFILE_LEVEL_SEPARATOR
+from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE, _PROFILE_LEVEL_SEPARATOR
 
 
 @dataclass
@@ -46,10 +46,16 @@ class ProfileData:
 
     def tick_start(self, name: str):
         self.current_stages.append(name)
-        time_data = find_time_data(self.data, self.current_stages)
+        if name == _PIPELINE_NAME_IN_PROFILE and len(self.current_stages) == 1:
+            time_data = self.data
+        else:
+            time_data = find_time_data(self.data, self.current_stages)
         time_data.started = time.perf_counter()
 
     def tick_end(self):
-        time_data = find_time_data(self.data, self.current_stages)
+        if len(self.current_stages) == 1:
+            time_data = self.data
+        else:
+            time_data = find_time_data(self.data, self.current_stages)
         time_data.ended = time.perf_counter()
         self.current_stages.pop(-1)
