@@ -48,14 +48,20 @@ class ProfileDBHandler:
         cur.execute(self._CREATE_TABLE_QUERY.format(self.latency_table))
         cur.execute(self._CREATE_TABLE_QUERY.format(self.throughput_table))
 
-    def put_data(self, names: List[str], latency: np.ndarray, throughput: np.ndarray) -> None:
+    def put_data(
+        self, names: List[str], latency: np.ndarray, throughput: np.ndarray
+    ) -> None:
         conn = self.conn
         self._put_one_table(names, latency, self.latency_table, conn)
         self._put_one_table(names, throughput, self.throughput_table, conn)
         conn.commit()
 
     def _put_one_table(
-        self, names: List[str], data: np.ndarray, table_name: str, conn: sqlite3.Connection
+        self,
+        names: List[str],
+        data: np.ndarray,
+        table_name: str,
+        conn: sqlite3.Connection,
     ) -> None:
         if len(data) == 0:
             return
@@ -64,7 +70,7 @@ class ProfileDBHandler:
             if col not in self.column_names:
                 self._add_new_column(col, conn)
 
-        names = [f"\"{name}\"" for name in names]
+        names = [f'"{name}"' for name in names]
         columns = ",".join(names)
         values = ",".join([str(v) for v in data])
         cur = conn.cursor()
@@ -137,7 +143,7 @@ class ProfilerHandler:
             self.previous_end_data = end_data.copy()
             self.is_first = False
             return
-        
+
         latency = self._calculate_latency(start_data, end_data)
         throughput = self._calculate_throughput(end_data)
         self.db_handler.put_data(name_data, latency, throughput)
@@ -150,7 +156,12 @@ class ProfilerHandler:
             raise ProfilingError("Found a None in a profile start record")
         if None in end_data:
             raise ProfilingError("Found a None in a profile end record")
-        name_data = [_PIPELINE_NAME_IN_PROFILE + name if name != "__" else _PIPELINE_NAME_IN_PROFILE for name in name_data]
+        name_data = [
+            _PIPELINE_NAME_IN_PROFILE + name
+            if name != "__"
+            else _PIPELINE_NAME_IN_PROFILE
+            for name in name_data
+        ]
         return name_data, np.array(start_data), np.array(end_data)
 
     def _calculate_latency(

@@ -20,7 +20,7 @@ def generate_one_cycle_test_profile_data(
     base_time: float = 100,
     base_name: str = "",
     substage_idx: int = -1,
-    num_substages: int = 3
+    num_substages: int = 3,
 ):
     current = base_time
     main_time_data.started = current
@@ -39,7 +39,7 @@ def generate_one_cycle_test_profile_data(
         else:
             current += latency
         time_data.ended = current
-        main_time_data.substage[stage_name] = time_data 
+        main_time_data.substage[stage_name] = time_data
     main_time_data.ended = current
     return main_time_data, current
 
@@ -80,10 +80,11 @@ def generate_test_latency_and_throughput_dict(
     latency_data = np.array([latency for _ in range(num_stages)])
     throughput_data = np.array([throughput for _ in range(num_stages)])
     return (
-        [names_data for _ in range(num_data)], 
-        [latency_data for _ in range(num_data)], 
-        [throughput_data for _ in range(num_data)]
+        [names_data for _ in range(num_data)],
+        [latency_data for _ in range(num_data)],
+        [throughput_data for _ in range(num_data)],
     )
+
 
 class TestProfileDBHandler:
     LATENCY_TABLE = "Latency"
@@ -160,7 +161,7 @@ class TestProfilerHandler:
         latency = 0.5
         throughput = 6.8
         substage_idx = 2
-        num_substages= 3
+        num_substages = 3
 
         data = generate_test_profile_data(
             num_data=num_data,
@@ -168,7 +169,7 @@ class TestProfilerHandler:
             latency=latency,
             throughput=throughput,
             substage_idx=substage_idx,
-            num_substages=num_substages
+            num_substages=num_substages,
         )
 
         for d in data:
@@ -190,8 +191,13 @@ class TestProfilerHandler:
         for k in latencies.keys():
             assert k.startswith(_PIPELINE_NAME_IN_PROFILE)
             if k == _PIPELINE_NAME_IN_PROFILE:
-                assert pytest.approx(latencies[k], rel=0.001) == latency * (num_stages + num_substages - 1)
-            elif k == f"{_PIPELINE_NAME_IN_PROFILE}{_PROFILE_LEVEL_SEPARATOR}{substage_idx}":
+                assert pytest.approx(latencies[k], rel=0.001) == latency * (
+                    num_stages + num_substages - 1
+                )
+            elif (
+                k
+                == f"{_PIPELINE_NAME_IN_PROFILE}{_PROFILE_LEVEL_SEPARATOR}{substage_idx}"
+            ):
                 assert pytest.approx(latencies[k], rel=0.001) == latency * num_substages
             else:
                 assert pytest.approx(latencies[k], rel=0.001) == latency

@@ -59,4 +59,3 @@ class ProfileData:
             time_data = find_time_data(self.data, self.current_stages)
             self.current_stages.pop(-1)
         time_data.ended = time.perf_counter()
-        

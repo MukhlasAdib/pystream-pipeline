@@ -17,7 +17,6 @@ from pystream.utils.errors import PipelineTerminated
 from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE, _PROFILE_LEVEL_SEPARATOR
 
 
-
 def test_send_output():
     data = PipelineData(data="test")
     data_queue = Queue(maxsize=1)

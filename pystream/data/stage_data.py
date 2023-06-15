@@ -5,7 +5,9 @@ from pystream.data.pipeline_data import PipelineData
 
 
 class StageQueueProtocol(Protocol):
-    def put(self, item: PipelineData, block: bool = True, timeout: Optional[float] = None) -> None:
+    def put(
+        self, item: PipelineData, block: bool = True, timeout: Optional[float] = None
+    ) -> None:
         ...
 
     def get(self, block: bool = True, timeout: Optional[float] = None) -> PipelineData:
@@ -24,7 +26,6 @@ class StageEventProtocol(Protocol):
 
     def wait(self, timeout: Optional[float] = None) -> bool:
         ...
-    
 
 
 @dataclass

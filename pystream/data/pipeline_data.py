@@ -3,6 +3,7 @@ from typing import Any
 
 from pystream.data.profiler_data import ProfileData
 
+
 @dataclass
 class PipelineData:
     data: Any = None
