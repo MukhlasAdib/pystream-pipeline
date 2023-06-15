@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from pystream.utils.errors import ProfilingError
-from pystream.utils.general import _PYSTREAM_DIR
+from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE, _PYSTREAM_DIR
 from pystream.data.profiler_data import ProfileData, TimeProfileData
 
 
@@ -149,6 +149,7 @@ class ProfilerHandler:
             raise ProfilingError("Found a None in a profile start record")
         if None in end_data:
             raise ProfilingError("Found a None in a profile end record")
+        name_data = [_PIPELINE_NAME_IN_PROFILE + name for name in name_data]
         return name_data, np.array(start_data), np.array(end_data)
 
     def _calculate_latency(
