@@ -41,11 +41,12 @@
 
 ### v0.1.4
 
-- [ ] Interface unification of serial and parallel pipeline stages by adding a wrapper for the stages.
-- [ ] Unification of serial and parallel stage links in staged mode.
 - [ ] Support for native mixed (serial and parallel) operation.
+- [ ] Code formatting CI.
+- [ ] Deny stage name with any non alphanumeric or "_" characters.
+- [ ] Measure `time.wait()` error during wait test.
 
 ### v0.2.0
 
 - [ ] Add parallelization using multiprocessing.
-- [ ] Support for pipeline branching and merging
+- [ ] Support for pipeline branching and merging.
