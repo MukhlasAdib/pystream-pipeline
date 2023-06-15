@@ -18,6 +18,12 @@ def get_default_stage_name() -> str:
 def check_invalid_stage_name(name: str) -> None:
     if "-" in name:
         raise InvalidStageName("Stage name cannot contain dash ('-')")
+    if "__" in name:
+        raise InvalidStageName("Stage name cannot double underscore ('__')")
+    if name.startswith("_"):
+        raise InvalidStageName("Stage name cannot start with underscore ('_')")
+    if name.endswith("_"):
+        raise InvalidStageName("Stage name cannot end with underscore ('_')")
     if _PIPELINE_NAME_IN_PROFILE == name:
         raise InvalidStageName(f"Stage name cannot be {_PIPELINE_NAME_IN_PROFILE}")
     if _FINAL_STAGE_NAME == name:
