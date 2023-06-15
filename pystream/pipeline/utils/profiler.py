@@ -154,7 +154,7 @@ class ProfilerHandler:
     def _calculate_latency(
         self, start_time: np.ndarray, end_time: np.ndarray
     ) -> np.ndarray:
-        return np.subtract(start_time, end_time)
+        return np.subtract(end_time, start_time)
 
     def _calculate_throughput(self, end_data: np.ndarray) -> np.ndarray:
         throughput = np.subtract(end_data, self.previous_end_data)

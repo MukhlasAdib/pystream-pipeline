@@ -2,6 +2,8 @@ import time
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
+from pystream.utils.general import _PROFILE_LEVEL_SEPARATOR
+
 
 @dataclass
 class TimeProfileData:
@@ -10,13 +12,18 @@ class TimeProfileData:
     substage: Dict[str, "TimeProfileData"] = field(default_factory=dict)
 
     def flatten(self) -> Tuple[List[str], List[Optional[float]], List[Optional[float]]]:
-        name_data = ["."]
+        name_data = [f"{_PROFILE_LEVEL_SEPARATOR}"]
         start_data = [self.started]
         end_data = [self.ended]
 
         for stage_name, stage_data in self.substage.items():
             sub_name_data, sub_start_data, sub_end_data = stage_data.flatten()
-            sub_name_data = [f".{stage_name}.{name}" for name in sub_name_data]
+            sub_name_data = [
+                f"{_PROFILE_LEVEL_SEPARATOR}{stage_name}{_PROFILE_LEVEL_SEPARATOR}{name}"
+                if name != f"{_PROFILE_LEVEL_SEPARATOR}"
+                else f"{_PROFILE_LEVEL_SEPARATOR}{stage_name}"
+                for name in sub_name_data
+            ]
             name_data.extend(sub_name_data)
             start_data.extend(sub_start_data)
             end_data.extend(sub_end_data)

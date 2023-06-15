@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import final
 
-from pystream import Stage
+from pystream.stage.stage import Stage
 from pystream.data.pipeline_data import PipelineData
 
 

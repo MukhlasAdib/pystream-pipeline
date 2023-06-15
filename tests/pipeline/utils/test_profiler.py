@@ -3,11 +3,12 @@ import sqlite3
 from pathlib import Path
 from typing import Dict, List, Tuple
 
+import numpy as np
 import pandas as pd
 import pytest
 
 import pystream.pipeline.utils.profiler as _profiler
-from pystream.data.profiler_data import ProfileData
+from pystream.data.profiler_data import ProfileData, TimeProfileData
 from pystream.pipeline.utils.profiler import ProfileDBHandler, ProfilerHandler
 
 
@@ -24,13 +25,16 @@ def generate_test_profile_data(
     for _ in range(num_data):
         current_base += 1 / throughput
         current = current_base
-        started = {}
-        ended = {}
+        main_time_data = TimeProfileData(started=current_base)
+        main_time_data.started = current
         for stage in stages_name:
-            started[stage] = current
+            time_data = TimeProfileData()
+            time_data.started = current
             current += latency
-            ended[stage] = current
-        data.append(ProfileData(started=started, ended=ended))
+            time_data.ended = current
+            main_time_data.substage[stage] = time_data 
+        main_time_data.ended = current
+        data.append(ProfileData(main_time_data))
     return data
 
 
@@ -39,17 +43,15 @@ def generate_test_latency_and_throughput_dict(
     num_stages: int = 5,
     latency: float = 0.5,
     throughput: float = 4,
-) -> Tuple[List[Dict[str, float]], List[Dict[str, float]]]:
-    latency_data = [
-        {f"Stage{chr(i + 65)}": latency for i in range(num_stages)}
-        for _ in range(num_data)
-    ]
-    throughput_data = [
-        {f"Stage{chr(i + 65)}": throughput for i in range(num_stages)}
-        for _ in range(num_data)
-    ]
-    return latency_data, throughput_data
-
+) -> Tuple[List[List[str]], List[np.ndarray], List[np.ndarray]]:
+    names_data = [f"Stage{chr(i + 65)}" for i in range(num_stages)]
+    latency_data = np.array([latency for _ in range(num_stages)])
+    throughput_data = np.array([throughput for _ in range(num_stages)])
+    return (
+        [names_data for _ in range(num_data)], 
+        [latency_data for _ in range(num_data)], 
+        [throughput_data for _ in range(num_data)]
+    )
 
 class TestProfileDBHandler:
     LATENCY_TABLE = "Latency"
@@ -80,14 +82,14 @@ class TestProfileDBHandler:
         throughput = 10
         num_data = 4
         num_stages = 5
-        latencies, throughputs = generate_test_latency_and_throughput_dict(
+        names, latencies, throughputs = generate_test_latency_and_throughput_dict(
             num_data=num_data,
             num_stages=num_stages,
             latency=latency,
             throughput=throughput,
         )
-        for lat, fps in zip(latencies, throughputs):
-            self.profiler_db.put_data(lat, fps)
+        for i in range(len(names)):
+            self.profiler_db.put_data(names[i], latencies[i], throughputs[i])
 
         with sqlite3.connect(self.db_path) as test_conn:
             for table_name in [self.LATENCY_TABLE, self.THROUGHPUT_TABLE]:
@@ -97,12 +99,12 @@ class TestProfileDBHandler:
                 assert table_df.shape[0] == num_data
 
         sum_lat, sum_fps = self.profiler_db.summarize("mean")
-        for stage in latencies[0].keys():
+        for stage in names[0]:
             assert sum_lat[stage] == latency
             assert sum_fps[stage] == throughput
 
         sum_lat, sum_fps = self.profiler_db.summarize("median")
-        for stage in latencies[0].keys():
+        for stage in names[0]:
             assert sum_lat[stage] == latency
             assert sum_fps[stage] == throughput
 
@@ -145,8 +147,8 @@ class TestProfilerHandler:
                 assert table_df.shape[0] == num_data - 1
 
         latencies, throughputs = self.profiler_handler.summarize()
-        assert len(latencies) == num_stages
-        assert len(throughputs) == num_stages
+        assert len(latencies) == num_stages + 1
+        assert len(throughputs) == num_stages + 1
         for k in latencies.keys():
             assert pytest.approx(latencies[k], rel=0.001) == latency
             assert pytest.approx(throughputs[k], rel=0.001) == throughput
