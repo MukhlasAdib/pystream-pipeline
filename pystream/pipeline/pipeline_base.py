@@ -15,7 +15,7 @@ class PipelineBase(Stage):
 
         Returns:
             PipelineData: the latest output data
-        """        
+        """
         self.forward(data)
         return self.get_results()
 
