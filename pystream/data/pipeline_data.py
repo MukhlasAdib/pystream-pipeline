@@ -1,19 +1,7 @@
-import time
 from dataclasses import dataclass, field
-from typing import Any, Dict
+from typing import Any
 
-
-@dataclass
-class ProfileData:
-    started: Dict[str, float] = field(default_factory=dict)
-    ended: Dict[str, float] = field(default_factory=dict)
-
-    def tick_start(self, name: str):
-        self.started[name] = time.perf_counter()
-
-    def tick_end(self, name: str):
-        self.ended[name] = time.perf_counter()
-
+from pystream.data.profiler_data import ProfileData
 
 @dataclass
 class PipelineData:

@@ -14,7 +14,7 @@ from pystream.pipeline.parallel_thread_pipeline.pipeline import (
 from pystream.pipeline.utils.profiler import ProfilerHandler
 from pystream.stage.container import StageContainer
 from pystream.utils.errors import PipelineTerminated
-from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE
+from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE, _PROFILE_LEVEL_SEPARATOR
 
 
 
@@ -157,8 +157,9 @@ class TestParallelThreadPipeline:
         assert len(latency) == self.num_stages + 1
         assert len(throughput) == self.num_stages + 1
         for name in self.names:
-            assert name in latency
-            assert name in throughput
+            level_name = f"{_PIPELINE_NAME_IN_PROFILE}{_PROFILE_LEVEL_SEPARATOR}{name}"
+            assert level_name in latency
+            assert level_name in throughput
         assert _PIPELINE_NAME_IN_PROFILE in latency
         assert _PIPELINE_NAME_IN_PROFILE in throughput
         for lat, fps in zip(latency.values(), throughput.values()):

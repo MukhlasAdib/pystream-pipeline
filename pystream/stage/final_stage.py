@@ -1,8 +1,9 @@
 from typing import Optional, Protocol
 
-from pystream.data.pipeline_data import PipelineData, ProfileData
+from pystream.data.pipeline_data import PipelineData
+from pystream.data.profiler_data import ProfileData
 from pystream.stage.stage import Stage
-from pystream.utils.general import _FINAL_STAGE_NAME, _PIPELINE_NAME_IN_PROFILE
+from pystream.utils.general import _FINAL_STAGE_NAME
 
 
 class ProfilerHandlerProtocol(Protocol):
@@ -16,7 +17,7 @@ class FinalStage(Stage):
         self._name = _FINAL_STAGE_NAME
 
     def __call__(self, data: PipelineData) -> PipelineData:
-        data.profile.tick_end(_PIPELINE_NAME_IN_PROFILE)
+        data.profile.tick_end()
         if self.profiler_handler is not None:
             self.profiler_handler.process_data(data.profile)
         return data

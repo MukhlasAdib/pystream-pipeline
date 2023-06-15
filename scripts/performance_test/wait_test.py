@@ -13,6 +13,7 @@ from loguru import logger
 from tabulate import tabulate
 
 from pystream import Pipeline, Stage
+from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE
 
 
 _WRITER = None
@@ -182,19 +183,19 @@ class PipelineTester:
 
         sum_val = 0
         for k in throughput.keys():
-            if k == "Pipeline":
+            if k == _PIPELINE_NAME_IN_PROFILE:
                 continue
             sum_val += throughput[k]
         actual_stage_throughput = sum_val / (len(throughput) - 1)
-        actual_pipeline_throughput = throughput["Pipeline"]
+        actual_pipeline_throughput = throughput[_PIPELINE_NAME_IN_PROFILE]
 
         sum_val = 0
         for k in latency.keys():
-            if k == "Pipeline":
+            if k == _PIPELINE_NAME_IN_PROFILE:
                 continue
             sum_val += latency[k]
         actual_stage_latency = sum_val / (len(latency) - 1)
-        actual_pipeline_latency = latency["Pipeline"]
+        actual_pipeline_latency = latency[_PIPELINE_NAME_IN_PROFILE]
 
         table_data = [
             self.create_row(

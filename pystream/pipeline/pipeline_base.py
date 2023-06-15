@@ -1,9 +1,24 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
+from typing import final
 
+from pystream.stage.stage import Stage
 from pystream.data.pipeline_data import PipelineData
 
 
-class PipelineBase(ABC):
+class PipelineBase(Stage):
+    @final
+    def __call__(self, data: PipelineData) -> PipelineData:
+        """Adapter that makes pipeline treated as stage
+
+        Args:
+            data (PipelineData): the input data
+
+        Returns:
+            PipelineData: the latest output data
+        """        
+        self.forward(data)
+        return self.get_results()
+
     @abstractmethod
     def forward(self, data_input: PipelineData) -> bool:
         """Send data to be processed by pipeline
@@ -23,9 +38,4 @@ class PipelineBase(ABC):
         Returns:
             PipelineData: the obtained data
         """
-        pass
-
-    @abstractmethod
-    def cleanup(self) -> None:
-        """Cleanup the pipeline."""
         pass
