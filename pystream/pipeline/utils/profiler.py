@@ -1,12 +1,14 @@
 import copy
-import sqlite3
-from typing import Dict, Literal, Tuple
-
 import os
+import sqlite3
+from typing import Dict, List, Literal, Tuple
+
+import numpy as np
 import pandas as pd
 
+from pystream.utils.errors import ProfilingError
 from pystream.utils.general import _PYSTREAM_DIR
-from pystream.data.profiler_data import ProfileData
+from pystream.data.profiler_data import ProfileData, TimeProfileData
 
 
 class ProfileDBHandler:
@@ -47,24 +49,24 @@ class ProfileDBHandler:
         cur.execute(self._CREATE_TABLE_QUERY.format(self.latency_table))
         cur.execute(self._CREATE_TABLE_QUERY.format(self.throughput_table))
 
-    def put_data(self, latency: Dict[str, float], throughput: Dict[str, float]) -> None:
+    def put_data(self, names: List[str], latency: np.ndarray, throughput: np.ndarray) -> None:
         conn = self.conn
-        self._put_one_table(latency, self.latency_table, conn)
-        self._put_one_table(throughput, self.throughput_table, conn)
+        self._put_one_table(names, latency, self.latency_table, conn)
+        self._put_one_table(names, throughput, self.throughput_table, conn)
         conn.commit()
 
     def _put_one_table(
-        self, data: Dict[str, float], table_name: str, conn: sqlite3.Connection
+        self, names: List[str], data: np.ndarray, table_name: str, conn: sqlite3.Connection
     ) -> None:
         if len(data) == 0:
             return
 
-        for col in data.keys():
+        for col in names:
             if col not in self.column_names:
                 self._add_new_column(col, conn)
 
-        columns = ",".join(data.keys())
-        values = ",".join([str(v) for v in data.values()])
+        columns = ",".join(names)
+        values = ",".join([str(v) for v in data])
         cur = conn.cursor()
         cur.execute(self._PUT_DATA_QUERY.format(table_name, columns, values))
 
@@ -112,7 +114,7 @@ class ProfilerHandler:
         """
         self.max_history = max_history
 
-        self.previous_data = ProfileData()
+        self.previous_end_data = np.array([])
         self.is_first = True
 
         self.db_folder = "user_data"
@@ -130,29 +132,35 @@ class ProfilerHandler:
         Args:
             data (ProfileData): the pipeline profile data
         """
+        name_data, start_data, end_data = self.get_flatten_data(data.data)
         if self.is_first:
-            self.previous_data = copy.deepcopy(data)
+            self.previous_end_data = end_data.copy()
             self.is_first = False
             return
+        
+        latency = self._calculate_latency(start_data, end_data)
+        throughput = self._calculate_throughput(end_data)
+        self.db_handler.put_data(name_data, latency, throughput)
 
-        latency = self._calculate_latency(data)
-        throughput = self._calculate_throughput(data)
-        self.previous_data = copy.deepcopy(data)
-        self.db_handler.put_data(latency, throughput)
+    def get_flatten_data(
+        self, time_data: TimeProfileData
+    ) -> Tuple[List[str], np.ndarray, np.ndarray]:
+        name_data, start_data, end_data = time_data.flatten()
+        if None in start_data:
+            raise ProfilingError("Found a None in a profile start record")
+        if None in end_data:
+            raise ProfilingError("Found a None in a profile end record")
+        return name_data, np.array(start_data), np.array(end_data)
 
-    def _calculate_latency(self, data: ProfileData) -> Dict[str, float]:
-        latency = {}
-        for stage in data.ended.keys():
-            if stage in data.started:
-                latency[stage] = data.ended[stage] - data.started[stage]
-        return latency
+    def _calculate_latency(
+        self, start_time: np.ndarray, end_time: np.ndarray
+    ) -> np.ndarray:
+        return np.subtract(start_time, end_time)
 
-    def _calculate_throughput(self, data: ProfileData) -> Dict[str, float]:
-        throughput = {}
-        for stage in data.ended.keys():
-            if stage in self.previous_data.ended:
-                period = data.ended[stage] - self.previous_data.ended[stage]
-                throughput[stage] = 1 / period
+    def _calculate_throughput(self, end_data: np.ndarray) -> np.ndarray:
+        throughput = np.subtract(end_data, self.previous_end_data)
+        throughput = np.divide(1, throughput)
+        self.previous_end_data = end_data.copy()
         return throughput
 
     def summarize(self) -> Tuple[Dict[str, float], Dict[str, float]]:
