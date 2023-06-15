@@ -44,7 +44,7 @@ class ProfileData:
     data: TimeProfileData = field(default_factory=TimeProfileData)
     current_stages: List[str] = field(default_factory=list)
 
-    def tick_start(self, name: str):
+    def tick_start(self, name: str) -> None:
         if name == _PIPELINE_NAME_IN_PROFILE:
             time_data = self.data
         else:
@@ -52,7 +52,7 @@ class ProfileData:
             time_data = find_time_data(self.data, self.current_stages)
         time_data.started = time.perf_counter()
 
-    def tick_end(self):
+    def tick_end(self) -> None:
         if len(self.current_stages) == 0:
             time_data = self.data
         else:

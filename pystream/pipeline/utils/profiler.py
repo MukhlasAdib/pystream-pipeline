@@ -5,9 +5,9 @@ from typing import Dict, List, Literal, Tuple
 import numpy as np
 import pandas as pd
 
+from pystream.data.profiler_data import ProfileData, TimeProfileData
 from pystream.utils.errors import ProfilingError
 from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE, _PYSTREAM_DIR
-from pystream.data.profiler_data import ProfileData, TimeProfileData
 
 
 class ProfileDBHandler:
