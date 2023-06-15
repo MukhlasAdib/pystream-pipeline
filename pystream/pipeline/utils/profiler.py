@@ -19,7 +19,7 @@ class ProfileDBHandler:
 
     _ADD_COLUMN_QUERY = """
         ALTER TABLE {} 
-        ADD COLUMN {} REAL;
+        ADD COLUMN "{}" REAL;
         """
 
     _PUT_DATA_QUERY = """
@@ -64,6 +64,7 @@ class ProfileDBHandler:
             if col not in self.column_names:
                 self._add_new_column(col, conn)
 
+        names = [f"\"{name}\"" for name in names]
         columns = ",".join(names)
         values = ",".join([str(v) for v in data])
         cur = conn.cursor()

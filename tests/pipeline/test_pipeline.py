@@ -70,7 +70,7 @@ class TestPipeline:
         assert self.pipeline.pipeline.last_data.data == new_data
         assert (
             _PIPELINE_NAME_IN_PROFILE
-            in self.pipeline.pipeline.last_data.profile.started
+            in self.pipeline.pipeline.last_data.profile.current_stages
         )
 
     def test_forward_generator(self):
