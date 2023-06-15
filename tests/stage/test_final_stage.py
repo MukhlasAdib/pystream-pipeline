@@ -27,5 +27,5 @@ class TestFinalStage:
     def test_call(self):
         data = PipelineData(data=[])
         ret = self.stage(data)
-        assert len(ret.profile.started) == 0
-        assert _PIPELINE_NAME_IN_PROFILE in ret.profile.ended
+        assert ret.profile.data.started is None
+        assert ret.profile.data.ended is not None

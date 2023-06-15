@@ -53,8 +53,9 @@ class TestStageContainer:
         data = PipelineData(data=[])
         ret = cont(data)
         assert ret.data == [self.val]
-        assert self.name in ret.profile.started
-        assert self.name in ret.profile.ended
+        assert self.name in ret.profile.data.substage
+        assert ret.profile.data.substage[self.name].started is not None
+        assert ret.profile.data.substage[self.name].ended is not None
 
     def test_cleanup(self):
         cont = StageContainer(self.stage, self.name)
