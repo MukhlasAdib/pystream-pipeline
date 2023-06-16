@@ -1,3 +1,5 @@
+import time
+
 import pytest
 
 from pystream import Pipeline, Stage
@@ -19,7 +21,7 @@ class TestMixedPipeline:
     ):
         stages = {}
         child_stages = {}
-        pipeline = Pipeline()
+        pipeline = Pipeline(input_generator=list, use_profiler=True)
         for i in range(num_stages):
             name = f"{parent_name}{i}"
             if i == child_idx:
@@ -80,4 +82,9 @@ class TestSerialInThread(TestMixedPipeline):
         for k, v in self.child_stages.items():
             assert k in actual_stages
             assert isinstance(v, Stage)
-            
+    
+    def test_forward_and_get_results(self):
+        self.pipeline.start_loop(self.wait_time)
+        time.sleep(2)
+        ret = self.pipeline.get_results()
+        print(ret)

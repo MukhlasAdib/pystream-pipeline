@@ -59,3 +59,7 @@ class ProfileData:
             time_data = find_time_data(self.data, self.current_stages)
             self.current_stages.pop(-1)
         time_data.ended = time.perf_counter()
+
+    @property
+    def is_at_main(self) -> bool:
+        return len(self.current_stages) == 0
