@@ -41,7 +41,7 @@ class TestMixedPipeline:
         if mode == "serial":
             pipeline.serialize()
         elif mode == "thread":
-            pipeline.parallelize()
+            pipeline.parallelize(block_output=True, output_timeout=10)
         return pipeline, stages, child_stages
 
     def assert_forward_and_get_results(
@@ -111,6 +111,55 @@ class TestSerialInThread(TestMixedPipeline):
         assert isinstance(child_pipeline, SerialPipeline)
         assert len(child_pipeline.pipeline) == self.num_child_stages + 1
         actual_stages = [s.name for s in child_pipeline.pipeline]
+        for k, v in self.child_stages.items():
+            assert k in actual_stages
+            assert isinstance(v, Stage)
+
+    def test_forward_and_get_results(self):
+        self.assert_forward_and_get_results(
+            self.pipeline,
+            loop_period=self.wait_time,
+            num_stages=self.num_stages,
+            child_idx=self.child_idx,
+            num_child_stages=self.num_child_stages,
+        )
+
+
+class TestThreadInSerial(TestMixedPipeline):
+    @pytest.fixture(autouse=True)
+    def _create_pipeline(self, dummy_stage):
+        self.num_stages = 3
+        self.wait_time = 0.1
+        self.mode = "serial"
+        self.child_idx = 1
+        self.num_child_stages = 2
+        self.child_mode = "thread"
+
+        self.pipeline, self.stages, self.child_stages = self._construct_pipeline(
+            dummy_stage,
+            num_stages=self.num_stages,
+            wait_time=self.wait_time,
+            mode=self.mode,
+            child_idx=self.child_idx,
+            num_child_stages=self.num_child_stages,
+            child_mode=self.child_mode,
+        )
+
+    def test_init_parent(self):
+        assert self.pipeline.pipeline is not None
+        assert isinstance(self.pipeline.pipeline, SerialPipeline)
+        assert len(self.pipeline.pipeline.pipeline) == self.num_stages + 1
+        actual_stages = [s.name for s in self.pipeline.pipeline.pipeline]
+        for k, v in self.stages.items():
+            assert k in actual_stages
+            assert isinstance(v, Stage)
+
+    def test_init_child(self):
+        assert isinstance(self.pipeline.pipeline, SerialPipeline)
+        child_pipeline = self.pipeline.pipeline.pipeline[self.child_idx].stage  # type: ignore
+        assert isinstance(child_pipeline, ParallelThreadPipeline)
+        assert len(child_pipeline.stages) == self.num_child_stages + 1
+        actual_stages = [s.name for s in child_pipeline.stages]
         for k, v in self.child_stages.items():
             assert k in actual_stages
             assert isinstance(v, Stage)

@@ -129,6 +129,8 @@ class ParallelThreadPipeline(PipelineBase):
         names: List[Optional[str]],
         block_input: bool = True,
         input_timeout: float = 10,
+        block_output: bool = False,
+        output_timeout: float = 10,
         profiler_handler: Optional[ProfilerHandler] = None,
     ) -> None:
         """The class that will handle the parallel pipeline
@@ -139,11 +141,15 @@ class ParallelThreadPipeline(PipelineBase):
                 in sequence.
             names (List[Optional[str]]): Stage names. If the name is None,
                 default stage name will be given.
-            block_input (bool, optional): Whether to set the forward method
+            block_input (bool, optional): Whether to set the `forward` method
                 into blocking mode with the specified timeout in input_timeout.
                 Defaults to True.
-            input_timeout (float, optional): Blocking timeout for the forward
+            input_timeout (float, optional): Blocking timeout for the `forward`
                 method in seconds. Defaults to 10.
+            block_output (bool, optional): Whether to set the `get_results` method
+                into blocking mode if there is not available data from the last
+                stage. Defaults to False.
+            output_timeout (float, optional): Blocking timeout for the `get_results`
             profiler_handler (Optional[ProfilerHandler]): Handler for the profiler.
                 If None, no profiling attempt will be done.
         """
@@ -154,6 +160,8 @@ class ParallelThreadPipeline(PipelineBase):
         self.stages.append(self.final_stage)
         self.block_input = block_input
         self.input_timeout = input_timeout
+        self.block_output = block_output
+        self.output_timeout = output_timeout
 
         self.build_pipeline()
         self.run_pipeline()
@@ -219,7 +227,9 @@ class ParallelThreadPipeline(PipelineBase):
 
     def get_results(self) -> PipelineData:
         try:
-            ret = self.main_input_queue.get(block=False)
+            ret = self.main_input_queue.get(
+                block=self.block_output, timeout=self.output_timeout
+            )
         except Empty:
             return PipelineData()
         else:

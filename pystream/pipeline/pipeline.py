@@ -78,17 +78,26 @@ class Pipeline:
         return self
 
     def parallelize(
-        self, block_input: bool = True, input_timeout: float = 10
+        self,
+        block_input: bool = True,
+        input_timeout: float = 10,
+        block_output: bool = False,
+        output_timeout: float = 10,
     ) -> "Pipeline":
         """Turn the pipeline into independent stage pipeline. Each stage
         will live in different thread and work asynchronously. However,
         the data will be passed to the stages in the same order as defined
 
         Args:
-            block_input (bool, optional): Whether to set the forward method
+            block_input (bool, optional): Whether to set the `forward` method
                 into blocking mode if the first stage is busy with the specified
                 timeout in input_timeout. Defaults to True.
-            input_timeout (float, optional): Blocking timeout for the forward
+            input_timeout (float, optional): Blocking timeout for the `forward`
+                method in seconds. Defaults to 10.
+            block_output (bool, optional): Whether to set the `get_results` method
+                into blocking mode if there is not available data from the last
+                stage. Defaults to False.
+            output_timeout (float, optional): Blocking timeout for the `get_results`
                 method in seconds. Defaults to 10.
 
         Returns:
@@ -99,6 +108,8 @@ class Pipeline:
             self.stage_names,
             block_input=block_input,
             input_timeout=input_timeout,
+            block_output=block_output,
+            output_timeout=output_timeout,
             profiler_handler=self.profiler,
         )
         return self
