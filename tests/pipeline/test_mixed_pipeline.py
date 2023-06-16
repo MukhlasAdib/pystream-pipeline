@@ -19,10 +19,11 @@ class TestMixedPipeline:
         num_child_stages=2,
         child_mode="thread",
         parent_name="",
+        use_profiler=False,
     ):
         stages = {}
         child_stages = {}
-        pipeline = Pipeline(input_generator=list, use_profiler=True)
+        pipeline = Pipeline(input_generator=list, use_profiler=use_profiler)
         for i in range(num_stages):
             name = f"{parent_name}{i}"
             if i == child_idx:
@@ -99,6 +100,7 @@ class TestSerialInThread(TestMixedPipeline):
             child_idx=self.child_idx,
             num_child_stages=self.num_child_stages,
             child_mode=self.child_mode,
+            use_profiler=True,
         )
 
     def test_init_parent(self):
@@ -151,6 +153,7 @@ class TestThreadInSerial(TestMixedPipeline):
             child_idx=self.child_idx,
             num_child_stages=self.num_child_stages,
             child_mode=self.child_mode,
+            use_profiler=True,
         )
 
     def test_init_parent(self):
