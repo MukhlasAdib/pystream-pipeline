@@ -48,6 +48,7 @@
 - [ ] Code formatting CI.
 - [ ] Deny stage name with any non alphanumeric or "_" characters.
 - [ ] Measure `time.wait()` error during wait test.
+- [ ] Protect against multiple profiling in mixed pipeline
 
 ### v0.3.0
 
