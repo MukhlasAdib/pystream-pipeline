@@ -29,3 +29,9 @@ class TestFinalStage:
         ret = self.stage(data)
         assert ret.profile.data.started is None
         assert ret.profile.data.ended is not None
+
+        data = PipelineData(data=[])
+        data.profile.current_stages = ["test"]
+        ret = self.stage(data)
+        assert ret.profile.data.started is None
+        assert ret.profile.data.ended is None
