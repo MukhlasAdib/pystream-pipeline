@@ -41,7 +41,7 @@
 
 ### v0.2.0
 
-- [ ] Support for native mixed (serial and parallel) operation.
+- [x] Support for native mixed (serial and parallel) operation.
 
 ### v0.2.1
 
