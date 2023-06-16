@@ -2,14 +2,13 @@ import time
 
 import pytest
 
-from pystream import Pipeline
+from pystream import Pipeline, Stage
 from pystream.pipeline import SerialPipeline
 from pystream.pipeline import ParallelThreadPipeline
 from pystream.pipeline.pipeline import PipelineUndefined
 from pystream.pipeline.pipeline_base import PipelineBase
 from pystream.pipeline.utils.profiler import ProfilerHandler
 from pystream.data.pipeline_data import PipelineData
-from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE
 
 
 class MockPipeline(PipelineBase):
@@ -126,3 +125,13 @@ class TestPipeline:
     def test_profiler(self):
         assert isinstance(self.pipeline.profiler, ProfilerHandler)
         assert self.pipeline.get_profiles() == ({}, {})
+
+    def test_as_stage_serial(self):
+        self.pipeline.serialize()
+        assert isinstance(self.pipeline.as_stage(), Stage)
+        assert isinstance(self.pipeline.as_stage(), SerialPipeline)
+
+    def test_as_stage_thread(self):
+        self.pipeline.parallelize()
+        assert isinstance(self.pipeline.as_stage(), Stage)
+        assert isinstance(self.pipeline.as_stage(), ParallelThreadPipeline)
