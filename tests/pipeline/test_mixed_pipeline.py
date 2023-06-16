@@ -44,15 +44,18 @@ class TestMixedPipeline:
             pipeline.parallelize()
         return pipeline, stages, child_stages
 
-
-    def assert_forward_and_get_results(self, pipeline: Pipeline, loop_period, num_stages, child_idx, num_child_stages):
+    def assert_forward_and_get_results(
+        self, pipeline: Pipeline, loop_period, num_stages, child_idx, num_child_stages
+    ):
         pipeline.start_loop(loop_period)
         time.sleep(2)
         ret = pipeline.get_results()
         lat, fps = pipeline.get_profiles()
         for i in range(num_stages):
             stage_name = f"{i}"
-            profile_name = f"{_PIPELINE_NAME_IN_PROFILE}{_PROFILE_LEVEL_SEPARATOR}{stage_name}"
+            profile_name = (
+                f"{_PIPELINE_NAME_IN_PROFILE}{_PROFILE_LEVEL_SEPARATOR}{stage_name}"
+            )
             assert profile_name in lat
             assert profile_name in fps
             assert lat[profile_name] > 0
@@ -61,7 +64,9 @@ class TestMixedPipeline:
             if i == child_idx:
                 for j in range(num_child_stages):
                     child_stage_name = f"{i}{j}"
-                    child_profile_name = f"{profile_name}{_PROFILE_LEVEL_SEPARATOR}{child_stage_name}"
+                    child_profile_name = (
+                        f"{profile_name}{_PROFILE_LEVEL_SEPARATOR}{child_stage_name}"
+                    )
                     assert child_stage_name in ret
                     assert child_profile_name in lat
                     assert child_profile_name in fps
@@ -69,6 +74,7 @@ class TestMixedPipeline:
                     assert fps[child_profile_name] > 0
             else:
                 assert stage_name in ret
+
 
 class TestSerialInThread(TestMixedPipeline):
     @pytest.fixture(autouse=True)
@@ -101,14 +107,14 @@ class TestSerialInThread(TestMixedPipeline):
 
     def test_init_child(self):
         assert isinstance(self.pipeline.pipeline, ParallelThreadPipeline)
-        child_pipeline = self.pipeline.pipeline.stages[self.child_idx].stage # type: ignore
+        child_pipeline = self.pipeline.pipeline.stages[self.child_idx].stage  # type: ignore
         assert isinstance(child_pipeline, SerialPipeline)
         assert len(child_pipeline.pipeline) == self.num_child_stages + 1
         actual_stages = [s.name for s in child_pipeline.pipeline]
         for k, v in self.child_stages.items():
             assert k in actual_stages
             assert isinstance(v, Stage)
-    
+
     def test_forward_and_get_results(self):
         self.assert_forward_and_get_results(
             self.pipeline,
