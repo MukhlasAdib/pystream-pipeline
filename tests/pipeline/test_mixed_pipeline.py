@@ -3,6 +3,7 @@ import time
 import pytest
 
 from pystream import Pipeline, Stage
+from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE, _PROFILE_LEVEL_SEPARATOR
 from pystream.pipeline import SerialPipeline
 from pystream.pipeline import ParallelThreadPipeline
 
@@ -44,6 +45,31 @@ class TestMixedPipeline:
         return pipeline, stages, child_stages
 
 
+    def assert_forward_and_get_results(self, pipeline: Pipeline, loop_period, num_stages, child_idx, num_child_stages):
+        pipeline.start_loop(loop_period)
+        time.sleep(2)
+        ret = pipeline.get_results()
+        lat, fps = pipeline.get_profiles()
+        for i in range(num_stages):
+            stage_name = f"{i}"
+            profile_name = f"{_PIPELINE_NAME_IN_PROFILE}{_PROFILE_LEVEL_SEPARATOR}{stage_name}"
+            assert profile_name in lat
+            assert profile_name in fps
+            assert lat[profile_name] > 0
+            assert fps[profile_name] > 0
+
+            if i == child_idx:
+                for j in range(num_child_stages):
+                    child_stage_name = f"{i}{j}"
+                    child_profile_name = f"{profile_name}{_PROFILE_LEVEL_SEPARATOR}{child_stage_name}"
+                    assert child_stage_name in ret
+                    assert child_profile_name in lat
+                    assert child_profile_name in fps
+                    assert lat[child_profile_name] > 0
+                    assert fps[child_profile_name] > 0
+            else:
+                assert stage_name in ret
+
 class TestSerialInThread(TestMixedPipeline):
     @pytest.fixture(autouse=True)
     def _create_pipeline(self, dummy_stage):
@@ -84,7 +110,10 @@ class TestSerialInThread(TestMixedPipeline):
             assert isinstance(v, Stage)
     
     def test_forward_and_get_results(self):
-        self.pipeline.start_loop(self.wait_time)
-        time.sleep(2)
-        ret = self.pipeline.get_results()
-        print(ret)
+        self.assert_forward_and_get_results(
+            self.pipeline,
+            loop_period=self.wait_time,
+            num_stages=self.num_stages,
+            child_idx=self.child_idx,
+            num_child_stages=self.num_child_stages,
+        )
