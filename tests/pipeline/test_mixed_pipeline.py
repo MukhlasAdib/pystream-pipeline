@@ -75,6 +75,11 @@ class TestMixedPipeline:
             else:
                 assert stage_name in ret
 
+    def assert_cleanup(self, pipeline, stages, child_stages):
+        pipeline.cleanup()
+        for s in list(stages.values()) + list(child_stages.values()):
+            assert s.val is None
+
 
 class TestSerialInThread(TestMixedPipeline):
     @pytest.fixture(autouse=True)
@@ -124,6 +129,9 @@ class TestSerialInThread(TestMixedPipeline):
             num_child_stages=self.num_child_stages,
         )
 
+    def test_cleanup(self):
+        self.assert_cleanup(self.pipeline, self.stages, self.child_stages)
+
 
 class TestThreadInSerial(TestMixedPipeline):
     @pytest.fixture(autouse=True)
@@ -172,3 +180,6 @@ class TestThreadInSerial(TestMixedPipeline):
             child_idx=self.child_idx,
             num_child_stages=self.num_child_stages,
         )
+
+    def test_cleanup(self):
+        self.assert_cleanup(self.pipeline, self.stages, self.child_stages)
