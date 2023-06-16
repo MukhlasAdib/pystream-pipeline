@@ -3,6 +3,7 @@ from typing import Type
 
 import pystream.stage.container as _container
 from pystream.data.pipeline_data import PipelineData
+from pystream.pipeline.pipeline_base import PipelineBase
 from pystream.stage.container import StageContainer
 from pystream.utils.errors import InvalidStageName
 from pystream.utils.general import _FINAL_STAGE_NAME, _PIPELINE_NAME_IN_PROFILE
@@ -18,6 +19,21 @@ def mock_default_name():
 
 def dummy_stage_func(x):
     return x
+
+
+class MockPipeline(PipelineBase):
+    def __init__(self):
+        self.data = None
+
+    def forward(self, data_input: PipelineData) -> bool:
+        self.data = data_input
+        return True
+
+    def get_results(self) -> PipelineData:
+        return PipelineData()
+
+    def cleanup(self) -> None:
+        pass
 
 
 class TestStageContainer:
@@ -62,6 +78,13 @@ class TestStageContainer:
         assert self.name in ret.profile.data.substage
         assert ret.profile.data.substage[self.name].started is not None
         assert ret.profile.data.substage[self.name].ended is not None
+
+    def test_call_to_pipeline(self):
+        mock_pipeline = MockPipeline()
+        cont = StageContainer(mock_pipeline, self.name)
+        data = PipelineData(data=[])
+        ret = cont(data)
+        assert isinstance(cont.stage.data, PipelineData)  # type: ignore
 
     def test_cleanup(self):
         cont = StageContainer(self.stage, self.name)

@@ -17,8 +17,9 @@ class FinalStage(Stage):
         self._name = _FINAL_STAGE_NAME
 
     def __call__(self, data: PipelineData) -> PipelineData:
+        is_at_main = data.profile.is_at_main
         data.profile.tick_end()
-        if self.profiler_handler is not None:
+        if self.profiler_handler is not None and is_at_main:
             self.profiler_handler.process_data(data.profile)
         return data
 

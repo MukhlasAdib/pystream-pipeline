@@ -1,4 +1,3 @@
-from __future__ import annotations
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from pystream.data.pipeline_data import (
@@ -11,7 +10,7 @@ from pystream.pipeline import ParallelThreadPipeline
 from pystream.pipeline.pipeline_base import PipelineBase
 from pystream.pipeline.utils.automation import PipelineAutomation
 from pystream.pipeline.utils.profiler import ProfilerHandler
-from pystream.stage.stage import StageCallable
+from pystream.stage.stage import Stage, StageCallable
 from pystream.utils.errors import PipelineUndefined
 from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE
 from pystream.utils.logger import LOGGER
@@ -66,7 +65,7 @@ class Pipeline:
         self.stages_sequence.append(stage)
         self.stage_names.append(name)
 
-    def serialize(self) -> Pipeline:
+    def serialize(self) -> "Pipeline":
         """Turn the pipeline into serial pipeline. All stages will
         be run in sequential and blocking mode.
 
@@ -79,17 +78,26 @@ class Pipeline:
         return self
 
     def parallelize(
-        self, block_input: bool = True, input_timeout: float = 10
-    ) -> Pipeline:
+        self,
+        block_input: bool = True,
+        input_timeout: float = 10,
+        block_output: bool = False,
+        output_timeout: float = 10,
+    ) -> "Pipeline":
         """Turn the pipeline into independent stage pipeline. Each stage
         will live in different thread and work asynchronously. However,
         the data will be passed to the stages in the same order as defined
 
         Args:
-            block_input (bool, optional): Whether to set the forward method
+            block_input (bool, optional): Whether to set the `forward` method
                 into blocking mode if the first stage is busy with the specified
                 timeout in input_timeout. Defaults to True.
-            input_timeout (float, optional): Blocking timeout for the forward
+            input_timeout (float, optional): Blocking timeout for the `forward`
+                method in seconds. Defaults to 10.
+            block_output (bool, optional): Whether to set the `get_results` method
+                into blocking mode if there is not available data from the last
+                stage. Defaults to False.
+            output_timeout (float, optional): Blocking timeout for the `get_results`
                 method in seconds. Defaults to 10.
 
         Returns:
@@ -100,6 +108,8 @@ class Pipeline:
             self.stage_names,
             block_input=block_input,
             input_timeout=input_timeout,
+            block_output=block_output,
+            output_timeout=output_timeout,
             profiler_handler=self.profiler,
         )
         return self
@@ -146,7 +156,7 @@ class Pipeline:
         """Get latest results from the pipeline
 
         Raises:
-            PipelineUndefined: raised if method `serialize` and
+            PipelineUndefined: raised if method `serialize` or
                 `parallelize` has not been invoked.
 
         Returns:
@@ -157,6 +167,21 @@ class Pipeline:
         if self.pipeline is None:
             raise PipelineUndefined("Pipeline has not been defined")
         return self.pipeline.get_results().data
+
+    def as_stage(self) -> Stage:
+        """Get the base pipeline executor, which can be treated as
+        a stage. Useful if you want to create pipeline inside pipeline
+
+        Raises:
+            PipelineUndefined: raised if method `serialize` or
+                `parallelize` has not been invoked.
+
+        Returns:
+            Stage: the base pipeline executor
+        """
+        if self.pipeline is None:
+            raise PipelineUndefined("Pipeline has not been defined")
+        return self.pipeline
 
     def cleanup(self) -> None:
         """Stop and cleanup the pipeline. Do nothing if the pipeline has not

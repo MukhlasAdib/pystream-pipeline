@@ -39,14 +39,21 @@
 
 ## On-going
 
-### v0.1.4
+### v0.2.0
 
-- [ ] Support for native mixed (serial and parallel) operation.
+- [x] Support for native mixed (serial and parallel) operation.
+- [ ] Protect against multiple profiling in mixed pipeline
+
+### v0.2.1
+
 - [ ] Code formatting CI.
 - [ ] Deny stage name with any non alphanumeric or "_" characters.
 - [ ] Measure `time.wait()` error during wait test.
 
-### v0.2.0
+### v0.3.0
+
+- [ ] Support for pipeline branching and merging.
+
+### v0.4.0
 
 - [ ] Add parallelization using multiprocessing.
-- [ ] Support for pipeline branching and merging.

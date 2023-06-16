@@ -1,6 +1,7 @@
 from typing import Optional
 
 from pystream.data.pipeline_data import PipelineData
+from pystream.pipeline.pipeline_base import PipelineBase
 from pystream.stage.stage import Stage, StageCallable
 from pystream.utils.errors import InvalidStageName
 from pystream.utils.general import _FINAL_STAGE_NAME, _PIPELINE_NAME_IN_PROFILE
@@ -44,12 +45,18 @@ class StageContainer(Stage):
     def __init__(self, stage: StageCallable, name: Optional[str] = None) -> None:
         self._name = get_stage_name(name, stage)
         self.stage = stage
+        self.pass_raw_data = True
+        if isinstance(stage, PipelineBase):
+            self.pass_raw_data = False
         if isinstance(stage, Stage):
             stage.name = self._name
 
     def __call__(self, data: PipelineData) -> PipelineData:
         data.profile.tick_start(self.name)
-        data.data = self.stage(data.data)
+        if self.pass_raw_data:
+            data.data = self.stage(data.data)
+        else:
+            data = self.stage(data)
         data.profile.tick_end()
         return data
 
