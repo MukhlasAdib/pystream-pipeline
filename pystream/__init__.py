@@ -7,5 +7,3 @@ from pystream.stage.stage import Stage
 __version__ = "0.1.3"
 
 logger = LOGGER
-
-

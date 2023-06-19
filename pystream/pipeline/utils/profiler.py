@@ -7,7 +7,11 @@ import pandas as pd
 
 from pystream.data.profiler_data import ProfileData, TimeProfileData
 from pystream.utils.errors import ProfilingError
-from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE, _PROFILER_DB_FOLDER, _PYSTREAM_DIR
+from pystream.utils.general import (
+    _PIPELINE_NAME_IN_PROFILE,
+    _PROFILER_DB_FOLDER,
+    _PYSTREAM_DIR,
+)
 
 
 class ProfileDBHandler:
