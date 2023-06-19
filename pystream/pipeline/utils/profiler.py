@@ -9,8 +9,7 @@ from pystream.data.profiler_data import ProfileData, TimeProfileData
 from pystream.utils.errors import ProfilingError
 from pystream.utils.general import (
     _PIPELINE_NAME_IN_PROFILE,
-    _PROFILER_DB_FOLDER,
-    _PYSTREAM_DIR,
+    get_profiler_db_folder,
 )
 
 
@@ -128,9 +127,9 @@ class ProfilerHandler:
         self.is_first = True
 
         self.db_filename = "last_profiles.sqlite"
-        os.makedirs(_PROFILER_DB_FOLDER, exist_ok=True)
+        os.makedirs(get_profiler_db_folder(), exist_ok=True)
 
-        db_path = os.path.join(_PROFILER_DB_FOLDER, self.db_filename)
+        db_path = os.path.join(get_profiler_db_folder(), self.db_filename)
         if os.path.isfile(db_path):
             os.remove(db_path)
         self.db_handler = ProfileDBHandler(db_path)
