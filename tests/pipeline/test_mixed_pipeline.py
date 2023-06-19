@@ -1,9 +1,14 @@
 import time
+from pathlib import Path
 
 import pytest
 
 from pystream import Pipeline, Stage
-from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE, _PROFILE_LEVEL_SEPARATOR
+from pystream.utils.general import (
+    _PIPELINE_NAME_IN_PROFILE,
+    _PROFILE_LEVEL_SEPARATOR,
+    set_profiler_db_folder,
+)
 from pystream.pipeline import SerialPipeline
 from pystream.pipeline import ParallelThreadPipeline
 
@@ -84,7 +89,8 @@ class TestMixedPipeline:
 
 class TestSerialInThread(TestMixedPipeline):
     @pytest.fixture(autouse=True)
-    def _create_pipeline(self, dummy_stage):
+    def _create_pipeline(self, dummy_stage, tmp_path: Path):
+        set_profiler_db_folder(str(tmp_path))
         self.num_stages = 3
         self.wait_time = 0.1
         self.mode = "thread"
@@ -137,7 +143,8 @@ class TestSerialInThread(TestMixedPipeline):
 
 class TestThreadInSerial(TestMixedPipeline):
     @pytest.fixture(autouse=True)
-    def _create_pipeline(self, dummy_stage):
+    def _create_pipeline(self, dummy_stage, tmp_path: Path):
+        set_profiler_db_folder(str(tmp_path))
         self.num_stages = 3
         self.wait_time = 0.1
         self.mode = "serial"

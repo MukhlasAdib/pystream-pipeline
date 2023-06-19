@@ -10,7 +10,11 @@ import pytest
 import pystream.pipeline.utils.profiler as _profiler
 from pystream.data.profiler_data import ProfileData, TimeProfileData
 from pystream.pipeline.utils.profiler import ProfileDBHandler, ProfilerHandler
-from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE, _PROFILE_LEVEL_SEPARATOR
+from pystream.utils.general import (
+    _PIPELINE_NAME_IN_PROFILE,
+    _PROFILE_LEVEL_SEPARATOR,
+    set_profiler_db_folder,
+)
 
 
 def generate_one_cycle_test_profile_data(
@@ -145,8 +149,8 @@ class TestProfileDBHandler:
 
 class TestProfilerHandler:
     @pytest.fixture(autouse=True)
-    def _init_profiler(self, tmp_path: Path, monkeypatch):
-        monkeypatch.setattr(_profiler, "_PYSTREAM_DIR", str(tmp_path))
+    def _init_profiler(self, tmp_path: Path):
+        set_profiler_db_folder(os.path.join(str(tmp_path), "user_data"))
         self.max_history = 100
         self.db_path = os.path.join(str(tmp_path), "user_data", "last_profiles.sqlite")
         self.profiler_handler = ProfilerHandler(max_history=self.max_history)
