@@ -51,7 +51,7 @@ class StageContainer(Stage):
 
     def __call__(self, data: PipelineData) -> PipelineData:
         data.profile.tick_start(self.name)
-        data = self.stage(data)
+        data.data = self.stage(data.data)
         data.profile.tick_end()
         return data
 
@@ -88,6 +88,6 @@ class PipelineContainer(StageContainer):
 
     def __call__(self, data: PipelineData) -> PipelineData:
         data.profile.tick_start(self.name)
-        data.data = self.stage(data.data)
+        data = self.stage(data)
         data.profile.tick_end()
         return data

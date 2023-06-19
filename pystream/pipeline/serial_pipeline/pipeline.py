@@ -26,14 +26,14 @@ class SerialPipeline(PipelineBase):
                 If None, no profiling attempt will be done.
         """
         self.final_stage = FinalStage(profiler_handler)
-        self.pipeline: List[Stage] = [
+        self.stages: List[Stage] = [
             StageContainer(stage, name) for stage, name in zip(stages, names)
         ]
-        self.pipeline.append(self.final_stage)
+        self.stages.append(self.final_stage)
         self.results = PipelineData()
 
     def forward(self, data: PipelineData) -> bool:
-        for stage in self.pipeline:
+        for stage in self.stages:
             data = stage(data)
         self.results = data
         return True
@@ -44,6 +44,6 @@ class SerialPipeline(PipelineBase):
         return ret
 
     def cleanup(self) -> None:
-        for stage in self.pipeline:
+        for stage in self.stages:
             if isinstance(stage, Stage):
                 stage.cleanup()

@@ -24,8 +24,8 @@ class TestSerialPipeline:
         )
 
     def test_init(self):
-        assert len(self.pipeline.pipeline) == self.num_stages + 1
-        for i, stage in enumerate(self.pipeline.pipeline[:-1]):
+        assert len(self.pipeline.stages) == self.num_stages + 1
+        for i, stage in enumerate(self.pipeline.stages[:-1]):
             assert stage.name == self.names[i]
 
     def test_forward_and_get_results_and_profiler(self):
