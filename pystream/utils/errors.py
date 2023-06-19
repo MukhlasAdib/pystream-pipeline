@@ -6,6 +6,10 @@ class PipelineTerminated(Exception):
     pass
 
 
+class PipelineInitiationError(Exception):
+    pass
+
+
 class InvalidStageName(ValueError):
     pass
 
