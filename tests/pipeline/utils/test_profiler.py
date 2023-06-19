@@ -10,7 +10,11 @@ import pytest
 import pystream.pipeline.utils.profiler as _profiler
 from pystream.data.profiler_data import ProfileData, TimeProfileData
 from pystream.pipeline.utils.profiler import ProfileDBHandler, ProfilerHandler
-from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE, _PROFILE_LEVEL_SEPARATOR, set_profiler_db_folder
+from pystream.utils.general import (
+    _PIPELINE_NAME_IN_PROFILE,
+    _PROFILE_LEVEL_SEPARATOR,
+    set_profiler_db_folder,
+)
 
 
 def generate_one_cycle_test_profile_data(

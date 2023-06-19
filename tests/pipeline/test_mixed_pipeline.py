@@ -4,7 +4,11 @@ from pathlib import Path
 import pytest
 
 from pystream import Pipeline, Stage
-from pystream.utils.general import _PIPELINE_NAME_IN_PROFILE, _PROFILE_LEVEL_SEPARATOR, set_profiler_db_folder
+from pystream.utils.general import (
+    _PIPELINE_NAME_IN_PROFILE,
+    _PROFILE_LEVEL_SEPARATOR,
+    set_profiler_db_folder,
+)
 from pystream.pipeline import SerialPipeline
 from pystream.pipeline import ParallelThreadPipeline
 
