@@ -6,7 +6,7 @@ from pystream.data.pipeline_data import PipelineData
 
 
 class PipelineBase(Stage):
-    stages: Optional[List] = None
+    stages: Optional[List[Stage]] = None
 
     @final
     def __call__(self, data: PipelineData) -> PipelineData:

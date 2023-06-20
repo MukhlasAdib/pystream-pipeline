@@ -3,9 +3,10 @@ from typing import List, Optional
 from pystream.data.pipeline_data import PipelineData
 from pystream.pipeline.pipeline_base import PipelineBase
 from pystream.pipeline.utils.profiler import ProfilerHandler
-from pystream.stage.container import StageContainer
+from pystream.pipeline.utils.general import containerize_stages
 from pystream.stage.final_stage import FinalStage
 from pystream.stage.stage import Stage, StageCallable
+from pystream.utils.errors import PipelineInitiationError
 
 
 class SerialPipeline(PipelineBase):
@@ -26,13 +27,13 @@ class SerialPipeline(PipelineBase):
                 If None, no profiling attempt will be done.
         """
         self.final_stage = FinalStage(profiler_handler)
-        self.stages: List[Stage] = [
-            StageContainer(stage, name) for stage, name in zip(stages, names)
-        ]
+        self.stages = containerize_stages(stages, names)
         self.stages.append(self.final_stage)
         self.results = PipelineData()
 
     def forward(self, data: PipelineData) -> bool:
+        if self.stages is None:
+            raise PipelineInitiationError("Bug: pipeline is being build with undefined stages")
         for stage in self.stages:
             data = stage(data)
         self.results = data
@@ -44,6 +45,8 @@ class SerialPipeline(PipelineBase):
         return ret
 
     def cleanup(self) -> None:
+        if self.stages is None:
+            return
         for stage in self.stages:
             if isinstance(stage, Stage):
                 stage.cleanup()
