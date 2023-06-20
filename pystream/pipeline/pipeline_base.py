@@ -1,12 +1,14 @@
 from abc import abstractmethod
 from typing import final, List, Optional
 
+from pystream.stage.final_stage import FinalStage
 from pystream.stage.stage import Stage
 from pystream.data.pipeline_data import PipelineData
 
 
 class PipelineBase(Stage):
-    stages: Optional[List[Stage]] = None
+    final_stage: FinalStage
+    stages: List[Stage]
 
     @final
     def __call__(self, data: PipelineData) -> PipelineData:

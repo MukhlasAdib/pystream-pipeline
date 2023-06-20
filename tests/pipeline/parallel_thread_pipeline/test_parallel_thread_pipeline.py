@@ -132,7 +132,6 @@ class TestParallelThreadPipeline:
         )
 
     def test_init(self):
-        assert self.pipeline.stages is not None
         assert len(self.pipeline.stages) == self.num_stages + 1
         assert len(self.pipeline.stage_threads) == self.num_stages + 1
         assert len(self.pipeline.stage_links) == self.num_stages + 1

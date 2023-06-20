@@ -108,23 +108,23 @@ class MixedPipelineTester:
     def test_init_parent(self):
         assert self.pipeline.pipeline is not None
         assert isinstance(self.pipeline.pipeline, self.mode)
-        assert self.pipeline.pipeline.stages is not None
         assert len(self.pipeline.pipeline.stages) == self.num_stages + 1
         actual_stages = [s.name for s in self.pipeline.pipeline.stages]
         for k, v in self.stages.items():
             assert k in actual_stages
             assert isinstance(v, Stage)
+        assert self.pipeline.pipeline.final_stage.profiler_handler is not None
 
     def test_init_child(self):
         assert isinstance(self.pipeline.pipeline, self.mode)
         child_pipeline = self.pipeline.pipeline.stages[self.child_idx].stage  # type: ignore
         assert isinstance(child_pipeline, self.child_mode)
-        assert child_pipeline.stages is not None
         assert len(child_pipeline.stages) == self.num_child_stages + 1
         actual_stages = [s.name for s in child_pipeline.stages]
         for k, v in self.child_stages.items():
             assert k in actual_stages
             assert isinstance(v, Stage)
+        assert child_pipeline.final_stage.profiler_handler is None
 
 
 class TestSerialInThread(MixedPipelineTester):

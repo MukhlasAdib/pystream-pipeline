@@ -24,7 +24,6 @@ class TestSerialPipeline:
         )
 
     def test_init(self):
-        assert self.pipeline.stages is not None
         assert len(self.pipeline.stages) == self.num_stages + 1
         for i, stage in enumerate(self.pipeline.stages[:-1]):
             assert stage.name == self.names[i]
