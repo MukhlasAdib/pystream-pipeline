@@ -2,8 +2,9 @@ from typing import Optional
 
 from pystream.data.pipeline_data import PipelineData
 from pystream.pipeline.pipeline_base import PipelineBase
+from pystream.stage.final_stage import FinalStage
 from pystream.stage.stage import Stage, StageCallable
-from pystream.utils.errors import InvalidStageName
+from pystream.utils.errors import InvalidStageName, PipelineInitiationError
 from pystream.utils.general import _FINAL_STAGE_NAME, _PIPELINE_NAME_IN_PROFILE
 
 
@@ -45,18 +46,12 @@ class StageContainer(Stage):
     def __init__(self, stage: StageCallable, name: Optional[str] = None) -> None:
         self._name = get_stage_name(name, stage)
         self.stage = stage
-        self.pass_raw_data = True
-        if isinstance(stage, PipelineBase):
-            self.pass_raw_data = False
         if isinstance(stage, Stage):
             stage.name = self._name
 
     def __call__(self, data: PipelineData) -> PipelineData:
         data.profile.tick_start(self.name)
-        if self.pass_raw_data:
-            data.data = self.stage(data.data)
-        else:
-            data = self.stage(data)
+        data.data = self.stage(data.data)
         data.profile.tick_end()
         return data
 
@@ -71,3 +66,24 @@ class StageContainer(Stage):
         else:
             name = self._name
         return name
+
+
+class PipelineContainer(StageContainer):
+    def __init__(self, stage: StageCallable, name: Optional[str] = None) -> None:
+        if not isinstance(stage, PipelineBase):
+            raise PipelineInitiationError(
+                "Bug: PipelineContainer is used for non-pipeline stage"
+            )
+        final_stage = stage.stages[-1]
+        if not isinstance(final_stage, FinalStage):
+            raise PipelineInitiationError(
+                f"Bug: pipeline {type(stage).__name__} final stage is not initialized properly"
+            )
+        final_stage.turn_profiler_off()
+        super().__init__(stage, name)
+
+    def __call__(self, data: PipelineData) -> PipelineData:
+        data.profile.tick_start(self.name)
+        data = self.stage(data)
+        data.profile.tick_end()
+        return data

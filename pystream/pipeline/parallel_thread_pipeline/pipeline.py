@@ -7,10 +7,10 @@ from pystream.data.pipeline_data import PipelineData
 from pystream.data.stage_data import StageLinks, StageQueueProtocol
 from pystream.pipeline.pipeline_base import PipelineBase
 from pystream.pipeline.utils.profiler import ProfilerHandler
-from pystream.stage.container import StageContainer
 from pystream.stage.final_stage import FinalStage
 from pystream.stage.stage import Stage, StageCallable
 from pystream.utils.errors import PipelineTerminated
+from pystream.pipeline.utils.general import containerize_stages
 from pystream.utils.logger import LOGGER
 
 
@@ -154,9 +154,7 @@ class ParallelThreadPipeline(PipelineBase):
                 If None, no profiling attempt will be done.
         """
         self.final_stage = FinalStage(profiler_handler)
-        self.stages: List[Stage] = [
-            StageContainer(stage, name) for stage, name in zip(stages, names)
-        ]
+        self.stages = containerize_stages(stages, names)
         self.stages.append(self.final_stage)
         self.block_input = block_input
         self.input_timeout = input_timeout

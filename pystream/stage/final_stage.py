@@ -29,3 +29,6 @@ class FinalStage(Stage):
     @property
     def name(self) -> str:
         return self._name
+
+    def turn_profiler_off(self) -> None:
+        self.profiler_handler = None

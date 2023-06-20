@@ -1,5 +1,6 @@
 import time
 from pathlib import Path
+from typing import Type
 
 import pytest
 
@@ -13,18 +14,38 @@ from pystream.pipeline import SerialPipeline
 from pystream.pipeline import ParallelThreadPipeline
 
 
-class TestMixedPipeline:
+class MixedPipelineTester:
+    num_stages = 3
+    wait_time = 0.1
+    mode = ParallelThreadPipeline
+    child_idx = 1
+    num_child_stages = 2
+    child_mode = SerialPipeline
+
+    def _init_tester(self, dummy_stage, tmp_path: Path):
+        set_profiler_db_folder(str(tmp_path))
+        self.pipeline, self.stages, self.child_stages = self._construct_pipeline(
+            dummy_stage,
+            num_stages=self.num_stages,
+            wait_time=self.wait_time,
+            mode=self.mode,
+            child_idx=self.child_idx,
+            num_child_stages=self.num_child_stages,
+            child_mode=self.child_mode,
+            use_profiler=True,
+        )
+
     def _construct_pipeline(
         self,
         dummy_stage,
-        num_stages=3,
-        wait_time=0.1,
-        mode="serial",
-        child_idx=-1,
-        num_child_stages=2,
-        child_mode="thread",
-        parent_name="",
-        use_profiler=False,
+        num_stages: int = 3,
+        wait_time: float = 0.1,
+        mode: Type = SerialPipeline,
+        child_idx: int = -1,
+        num_child_stages: int = 2,
+        child_mode: Type = ParallelThreadPipeline,
+        parent_name: str = "",
+        use_profiler: bool = False,
     ):
         stages = {}
         child_stages = {}
@@ -44,20 +65,18 @@ class TestMixedPipeline:
                 dummy = dummy_stage(val=name, wait=wait_time)
                 stages[name] = dummy
             pipeline.add(dummy, name)
-        if mode == "serial":
+        if mode is SerialPipeline:
             pipeline.serialize()
-        elif mode == "thread":
+        elif mode is ParallelThreadPipeline:
             pipeline.parallelize(block_output=True, output_timeout=10)
         return pipeline, stages, child_stages
 
-    def assert_forward_and_get_results(
-        self, pipeline: Pipeline, loop_period, num_stages, child_idx, num_child_stages
-    ):
-        pipeline.start_loop(loop_period)
+    def test_forward_and_get_results(self):
+        self.pipeline.start_loop(self.wait_time)
         time.sleep(2)
-        ret = pipeline.get_results()
-        lat, fps = pipeline.get_profiles()
-        for i in range(num_stages):
+        ret = self.pipeline.get_results()
+        lat, fps = self.pipeline.get_profiles()
+        for i in range(self.num_stages):
             stage_name = f"{i}"
             profile_name = (
                 f"{_PIPELINE_NAME_IN_PROFILE}{_PROFILE_LEVEL_SEPARATOR}{stage_name}"
@@ -67,8 +86,8 @@ class TestMixedPipeline:
             assert lat[profile_name] > 0
             assert fps[profile_name] > 0
 
-            if i == child_idx:
-                for j in range(num_child_stages):
+            if i == self.child_idx:
+                for j in range(self.num_child_stages):
                     child_stage_name = f"{i}{j}"
                     child_profile_name = (
                         f"{profile_name}{_PROFILE_LEVEL_SEPARATOR}{child_stage_name}"
@@ -81,115 +100,54 @@ class TestMixedPipeline:
             else:
                 assert stage_name in ret
 
-    def assert_cleanup(self, pipeline, stages, child_stages):
-        pipeline.cleanup()
-        for s in list(stages.values()) + list(child_stages.values()):
+    def test_cleanup(self):
+        self.pipeline.cleanup()
+        for s in list(self.stages.values()) + list(self.child_stages.values()):
             assert s.val is None
-
-
-class TestSerialInThread(TestMixedPipeline):
-    @pytest.fixture(autouse=True)
-    def _create_pipeline(self, dummy_stage, tmp_path: Path):
-        set_profiler_db_folder(str(tmp_path))
-        self.num_stages = 3
-        self.wait_time = 0.1
-        self.mode = "thread"
-        self.child_idx = 1
-        self.num_child_stages = 2
-        self.child_mode = "serial"
-
-        self.pipeline, self.stages, self.child_stages = self._construct_pipeline(
-            dummy_stage,
-            num_stages=self.num_stages,
-            wait_time=self.wait_time,
-            mode=self.mode,
-            child_idx=self.child_idx,
-            num_child_stages=self.num_child_stages,
-            child_mode=self.child_mode,
-            use_profiler=True,
-        )
 
     def test_init_parent(self):
         assert self.pipeline.pipeline is not None
-        assert isinstance(self.pipeline.pipeline, ParallelThreadPipeline)
+        assert isinstance(self.pipeline.pipeline, self.mode)
         assert len(self.pipeline.pipeline.stages) == self.num_stages + 1
         actual_stages = [s.name for s in self.pipeline.pipeline.stages]
         for k, v in self.stages.items():
             assert k in actual_stages
             assert isinstance(v, Stage)
+        assert self.pipeline.pipeline.final_stage.profiler_handler is not None
 
     def test_init_child(self):
-        assert isinstance(self.pipeline.pipeline, ParallelThreadPipeline)
+        assert isinstance(self.pipeline.pipeline, self.mode)
         child_pipeline = self.pipeline.pipeline.stages[self.child_idx].stage  # type: ignore
-        assert isinstance(child_pipeline, SerialPipeline)
-        assert len(child_pipeline.pipeline) == self.num_child_stages + 1
-        actual_stages = [s.name for s in child_pipeline.pipeline]
-        for k, v in self.child_stages.items():
-            assert k in actual_stages
-            assert isinstance(v, Stage)
-
-    def test_forward_and_get_results(self):
-        self.assert_forward_and_get_results(
-            self.pipeline,
-            loop_period=self.wait_time,
-            num_stages=self.num_stages,
-            child_idx=self.child_idx,
-            num_child_stages=self.num_child_stages,
-        )
-
-    def test_cleanup(self):
-        self.assert_cleanup(self.pipeline, self.stages, self.child_stages)
-
-
-class TestThreadInSerial(TestMixedPipeline):
-    @pytest.fixture(autouse=True)
-    def _create_pipeline(self, dummy_stage, tmp_path: Path):
-        set_profiler_db_folder(str(tmp_path))
-        self.num_stages = 3
-        self.wait_time = 0.1
-        self.mode = "serial"
-        self.child_idx = 1
-        self.num_child_stages = 2
-        self.child_mode = "thread"
-
-        self.pipeline, self.stages, self.child_stages = self._construct_pipeline(
-            dummy_stage,
-            num_stages=self.num_stages,
-            wait_time=self.wait_time,
-            mode=self.mode,
-            child_idx=self.child_idx,
-            num_child_stages=self.num_child_stages,
-            child_mode=self.child_mode,
-            use_profiler=True,
-        )
-
-    def test_init_parent(self):
-        assert self.pipeline.pipeline is not None
-        assert isinstance(self.pipeline.pipeline, SerialPipeline)
-        assert len(self.pipeline.pipeline.pipeline) == self.num_stages + 1
-        actual_stages = [s.name for s in self.pipeline.pipeline.pipeline]
-        for k, v in self.stages.items():
-            assert k in actual_stages
-            assert isinstance(v, Stage)
-
-    def test_init_child(self):
-        assert isinstance(self.pipeline.pipeline, SerialPipeline)
-        child_pipeline = self.pipeline.pipeline.pipeline[self.child_idx].stage  # type: ignore
-        assert isinstance(child_pipeline, ParallelThreadPipeline)
+        assert isinstance(child_pipeline, self.child_mode)
         assert len(child_pipeline.stages) == self.num_child_stages + 1
         actual_stages = [s.name for s in child_pipeline.stages]
         for k, v in self.child_stages.items():
             assert k in actual_stages
             assert isinstance(v, Stage)
+        assert child_pipeline.final_stage.profiler_handler is None
 
-    def test_forward_and_get_results(self):
-        self.assert_forward_and_get_results(
-            self.pipeline,
-            loop_period=self.wait_time,
-            num_stages=self.num_stages,
-            child_idx=self.child_idx,
-            num_child_stages=self.num_child_stages,
-        )
 
-    def test_cleanup(self):
-        self.assert_cleanup(self.pipeline, self.stages, self.child_stages)
+class TestSerialInThread(MixedPipelineTester):
+    @pytest.fixture(autouse=True)
+    def _create_pipeline(self, dummy_stage, tmp_path: Path):
+        set_profiler_db_folder(str(tmp_path))
+        self.num_stages = 3
+        self.wait_time = 0.1
+        self.mode = ParallelThreadPipeline
+        self.child_idx = 1
+        self.num_child_stages = 2
+        self.child_mode = SerialPipeline
+        self._init_tester(dummy_stage, tmp_path)
+
+
+class TestThreadInSerial(MixedPipelineTester):
+    @pytest.fixture(autouse=True)
+    def _create_pipeline(self, dummy_stage, tmp_path: Path):
+        set_profiler_db_folder(str(tmp_path))
+        self.num_stages = 3
+        self.wait_time = 0.1
+        self.mode = SerialPipeline
+        self.child_idx = 1
+        self.num_child_stages = 2
+        self.child_mode = ParallelThreadPipeline
+        self._init_tester(dummy_stage, tmp_path)

@@ -4,7 +4,8 @@ from typing import Type
 import pystream.stage.container as _container
 from pystream.data.pipeline_data import PipelineData
 from pystream.pipeline.pipeline_base import PipelineBase
-from pystream.stage.container import StageContainer
+from pystream.stage.final_stage import FinalStage
+from pystream.stage.container import PipelineContainer, StageContainer
 from pystream.utils.errors import InvalidStageName
 from pystream.utils.general import _FINAL_STAGE_NAME, _PIPELINE_NAME_IN_PROFILE
 from tests.conftest import DummyStage
@@ -21,9 +22,16 @@ def dummy_stage_func(x):
     return x
 
 
+class MockProfilerHandler:
+    def process_data(self, data) -> None:
+        pass
+
+
 class MockPipeline(PipelineBase):
     def __init__(self):
         self.data = None
+        self.final_stage = FinalStage(MockProfilerHandler())
+        self.stages = [self.final_stage]
 
     def forward(self, data_input: PipelineData) -> bool:
         self.data = data_input
@@ -79,13 +87,6 @@ class TestStageContainer:
         assert ret.profile.data.substage[self.name].started is not None
         assert ret.profile.data.substage[self.name].ended is not None
 
-    def test_call_to_pipeline(self):
-        mock_pipeline = MockPipeline()
-        cont = StageContainer(mock_pipeline, self.name)
-        data = PipelineData(data=[])
-        ret = cont(data)
-        assert isinstance(cont.stage.data, PipelineData)  # type: ignore
-
     def test_cleanup(self):
         cont = StageContainer(self.stage, self.name)
         cont.cleanup()
@@ -102,3 +103,17 @@ class TestStageContainer:
     def test_cleanup_func(self):
         cont = StageContainer(dummy_stage_func)
         cont.cleanup()
+
+
+class TestPipelineContainer(TestStageContainer):
+    def test_profiler_reset(self):
+        mock_pipeline = MockPipeline()
+        cont = PipelineContainer(mock_pipeline, self.name)
+        assert cont.stage.final_stage.profiler_handler is None  # type: ignore
+
+    def test_call(self):
+        mock_pipeline = MockPipeline()
+        cont = PipelineContainer(mock_pipeline, self.name)
+        data = PipelineData(data=[])
+        ret = cont(data)
+        assert isinstance(cont.stage.data, PipelineData)  # type: ignore

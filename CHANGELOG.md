@@ -43,7 +43,7 @@
 
 - [x] Support for native mixed (serial and parallel) operation.
 - [x] Specify custom profiler DB path
-- [ ] Protect against multiple profiling in mixed pipeline
+- [x] Protect against multiple profiling in mixed pipeline
 
 ### v0.2.1
 

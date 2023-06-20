@@ -27,5 +27,5 @@ def get_profiler_db_folder() -> str:
 
     Returns:
         str: the DB folder
-    """    
+    """
     return _PROFILER_DB_FOLDER
