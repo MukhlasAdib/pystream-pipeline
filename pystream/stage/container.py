@@ -74,10 +74,6 @@ class PipelineContainer(StageContainer):
             raise PipelineInitiationError(
                 "Bug: PipelineContainer is used for non-pipeline stage"
             )
-        if stage.stages is None:
-            raise PipelineInitiationError(
-                f"Bug: pipeline {type(stage).__name__} is not initialized properly"
-            )
         final_stage = stage.stages[-1]
         if not isinstance(final_stage, FinalStage):
             raise PipelineInitiationError(
