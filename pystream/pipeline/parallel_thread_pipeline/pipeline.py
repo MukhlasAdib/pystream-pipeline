@@ -9,7 +9,7 @@ from pystream.pipeline.pipeline_base import PipelineBase
 from pystream.pipeline.utils.profiler import ProfilerHandler
 from pystream.stage.final_stage import FinalStage
 from pystream.stage.stage import Stage, StageCallable
-from pystream.utils.errors import PipelineInitiationError, PipelineTerminated
+from pystream.utils.errors import PipelineTerminated
 from pystream.pipeline.utils.general import containerize_stages
 from pystream.utils.logger import LOGGER
 
