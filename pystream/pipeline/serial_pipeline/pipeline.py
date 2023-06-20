@@ -33,7 +33,9 @@ class SerialPipeline(PipelineBase):
 
     def forward(self, data: PipelineData) -> bool:
         if self.stages is None:
-            raise PipelineInitiationError("Bug: pipeline is being build with undefined stages")
+            raise PipelineInitiationError(
+                "Bug: pipeline is being build with undefined stages"
+            )
         for stage in self.stages:
             data = stage(data)
         self.results = data

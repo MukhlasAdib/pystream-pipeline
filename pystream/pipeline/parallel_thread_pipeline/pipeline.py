@@ -168,7 +168,9 @@ class ParallelThreadPipeline(PipelineBase):
     def build_pipeline(self):
         """Build the pipeline."""
         if self.stages is None:
-            raise PipelineInitiationError("Bug: pipeline is being build with undefined stages")
+            raise PipelineInitiationError(
+                "Bug: pipeline is being build with undefined stages"
+            )
         # Create the first link
         self.stopper = Event()
         self.starter = Event()
