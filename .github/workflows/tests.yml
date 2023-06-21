@@ -25,4 +25,4 @@ jobs:
       - name: Unit tests
         run: poetry run pytest tests
       - name: Unit tests (notebooks)
-        run: poetry run pytest --nbmake .\demo.ipynb
+        run: poetry run pytest --nbmake ./demo.ipynb
