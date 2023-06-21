@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
 
     steps:
       - uses: actions/checkout@v3
@@ -24,3 +24,5 @@ jobs:
         run: poetry install --no-root
       - name: Unit tests
         run: poetry run pytest tests
+      - name: Unit tests (notebooks)
+        run: poetry run pytest --nbmake ./demo.ipynb
