@@ -10,7 +10,8 @@ class Stage(ABC):
     have a cleanup routine should be defined as a subclass of this class.
 
     Useful property:
-        name (str): the stage name, if not defined by the child instance,
+        name (str): 
+            the stage name, if not defined by the child instance,
             the name will be assigned automatically after the pipeline
             is constructed. Defaults to ""
     """
