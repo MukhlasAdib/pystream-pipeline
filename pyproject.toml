@@ -36,10 +36,14 @@ docutils = "^0.17.1"
 numpy = "^1.22.0"
 opencv-python = "^4.5.5"
 Sphinx = "^5.0.2"
-sphinx-rtd-theme = "^1.0.0"
+sphinx-rtd-theme = "^1.2.2"
 ipykernel = "^6.19.4"
 pytest-cov = "^4.0.0"
 nbmake = "^1.4.1"
+esbonio = "^0.16.1"
+rstcheck = {extras = ["sphinx"], version = "^6.1.2"}
+restructuredtext-lint = "^1.4.0"
+doc8 = "<=1.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
