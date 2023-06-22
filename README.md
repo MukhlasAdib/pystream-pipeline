@@ -29,7 +29,7 @@ pip install pystream-pipeline
 If you want to build this package from source or develop it, we recommend you to use Poetry. First install Poetry by following the instructions in [its documentation site](https://python-poetry.org/docs/#installation). Then clone this repository and install all the dependencies. Poetry can help you do this and it will also setup a new virtual environment for you.
 
 ```bash
-poetry install
+poetry install --with dev
 ```
 
 To build the wheel file, you can run
