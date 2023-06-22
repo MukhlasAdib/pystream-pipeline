@@ -14,8 +14,6 @@ A PyStream **pipeline** is constructed by several **stages**, where each stage r
 
 - **Parallel mode:** In this mode, each stage live in a separate parallel thread. If a data has been finished being processed by a stage, the results will be send to the next stage. Since each stage runs in parallel, that stage can immediately take next data input if exist and process it immediately. This way, we can process multiple data at one time, thus increasing the throughput of your pipeline.
 
-- **Mixed mode:** This a mix of serial and parallel mode. You can put a serial pipeline inside a parallel one and vice versa. Parallel pipeline can improve the pipeline throughput but it is prone to larger latency. Mixing serial and parallel pipeline can very useful to optimize the latency and throughput of your pipeline further.
-
 Whatever the mode you choose, you only need to focus on implementation of your own data processing codes and pack them into several stages. PyStream will handle the pipeline executions including the threads and the linking of stages for you.
 
 ## Installation
@@ -29,7 +27,7 @@ pip install pystream-pipeline
 If you want to build this package from source or develop it, we recommend you to use Poetry. First install Poetry by following the instructions in [its documentation site](https://python-poetry.org/docs/#installation). Then clone this repository and install all the dependencies. Poetry can help you do this and it will also setup a new virtual environment for you.
 
 ```bash
-poetry install --with dev
+poetry install
 ```
 
 To build the wheel file, you can run
@@ -46,5 +44,5 @@ API of PyStream can be found in this project [documentation](https://pystream-pi
 
 You can also access some examples:
 
-- See [`demo.ipynb`](demo.ipynb) to get the quick start of PyStream.
+- See [`demo.ipynb`](demo.ipynb) to see how PyStream can be used to build a dummy pipeline.
 - See how PyStream is used to increase the throughput of a vehicle environment mapping system in [this repository](https://github.com/MukhlasAdib/KITTI_Mapping/tree/main/app).

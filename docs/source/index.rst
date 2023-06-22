@@ -6,10 +6,6 @@ Since PyStream is focusing on improving data pipeline performance, this package 
 PyStream does this by running your pipeline in managed multiple threads and/or processes (*to be added*), allowing several data to be processed at the same time.
 This package will handle the threads and processes for you, so you only need to focus on writing your data processing codes.
 
-Here are some examples:
-
-- See `demo.ipynb <https://github.com/MukhlasAdib/pystream-pipeline/blob/main/demo.ipynb>`_ to get the quick start of PyStream.
-- See how PyStream is used to increase the throughput of a vehicle environment mapping system in `this repository <https://github.com/MukhlasAdib/KITTI_Mapping/tree/main/app>`_.
 
 Pages
 ----------------------------------------------
