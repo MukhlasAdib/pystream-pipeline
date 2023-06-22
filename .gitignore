@@ -3,6 +3,7 @@
 REPORT.md
 user_data
 .vscode
+docs/source/_build
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
