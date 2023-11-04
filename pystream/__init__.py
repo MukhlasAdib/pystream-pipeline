@@ -11,5 +11,11 @@ from pystream.stage.stage import Stage
 __version__ = "0.1.3"
 
 logger = LOGGER
+"""
+The PyStream logger object from logging package
+"""
 
 MAIN_PIPELINE_NAME = _PIPELINE_NAME_IN_PROFILE
+"""
+The name of main pipeline in profiling result
+"""
