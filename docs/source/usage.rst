@@ -1,4 +1,4 @@
-Usage of PyStream
+Basic Usage
 ======================================
 
 In general, PyStream provides a set of tools to build a data pipeline, especially the one that is targeted for low-latency and high-throughput application.
@@ -10,7 +10,7 @@ Depends on the operations you have, you will be able to boost the speed and thro
 A PyStream **pipeline** is made of several **stages** that are linked together.  
 The stages are persistent and can be operated autonomously, i.e., it can continuously process data. 
 It is also structured in such a way to increase its performance.
-You can directly check the `demo script <https://github.com/MukhlasAdib/pystream-pipeline/blob/main/demo.ipynb>`_ of PyStream to see how this package is used.
+You can directly check the `demo notebook <https://github.com/MukhlasAdib/pystream-pipeline/blob/main/demo.ipynb>`_ of PyStream to see how this package is used.
 Please visit the `API documentation <https://pystream-pipeline.readthedocs.io/en/latest/api.html>`_ for more detailed information.
 
 To create a pipeline you need to use the following classes:
