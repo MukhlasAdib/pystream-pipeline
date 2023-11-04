@@ -31,7 +31,13 @@ Here is a sample result of latency::
 Each item's key represents a stage/pipeline whereas the value represents the latency in seconds.
 Double underscores ``__`` is used as the saparator between sub-pipeline levels (useful in mixed pipeline).
 The overall pipeline data are always named as ``MainPipeline``.
+That name can be changed in the future, but you can access it programatically from ``pystream.MAIN_PIPELINE_NAME``.
 The throughput has the same format as latency, but the values are presented in data/second format. 
+
+Note that the profiler use a SQLite database to store the latency and throughput records.
+You can get the database directory location by invoking ``pystream.get_profiler_db_folder()``.
+You can specify custom database directory by invoking ``pystream.set_profiler_db_folder(dir_path)``.
+Note that you need to set the custom directory before creating the pipeline.
 
 2. Mixed Pipeline
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
