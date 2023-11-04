@@ -39,11 +39,10 @@ The throughput has the same format as latency, but the values are presented in d
 You can also create pipeline inside another pipeline.
 This feature is useful  if you want to:
 
-- Groups your stages into several sub-pipelines
+- Group your stages into several sub-pipelines
 - Mix serial and parallel pipelines, e.g., create serial pipeline inside parallel pipeline.
 
-In order to do that, you need to convert the sub-pipeline into a stage, which is easy.
-Use ``as_stage`` method of ``pystream.Pipeline`` to get the stage-form of the pipeline.
+In order to do that, you need to convert the sub-pipeline into a stage, which can be done easily by using ``as_stage`` method of ``pystream.Pipeline``.
 Here is an example::
 
     # create serial sub-pipeline
