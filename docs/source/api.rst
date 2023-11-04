@@ -24,7 +24,5 @@ Constants
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autodata:: pystream.logger
-    :annotation:
 
 .. autodata:: pystream.MAIN_PIPELINE_NAME
-    :annotation:
