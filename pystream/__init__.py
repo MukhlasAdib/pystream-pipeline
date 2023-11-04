@@ -8,7 +8,7 @@ from pystream.utils.general import (
 from pystream.pipeline.pipeline import Pipeline
 from pystream.stage.stage import Stage
 
-__version__ = "0.1.3"
+__version__ = "0.2.0"
 
 logger = LOGGER
 """

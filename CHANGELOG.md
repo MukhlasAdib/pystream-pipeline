@@ -2,6 +2,14 @@
 
 ## Released
 
+### v0.2.0
+
+- [x] Support for native mixed (serial and parallel) operation.
+- [x] Specify custom profiler DB path
+- [x] Protect against multiple profiling in mixed pipeline
+- [x] CI test for notebooks
+- [x] CI test using python 3.11
+
 ### v0.1.3
 
 - [x] Add built-in pipeline profiling feature.
@@ -38,14 +46,6 @@
   - [x] Documentation in `docs` about basic API.
 
 ## On-going
-
-### v0.2.0
-
-- [x] Support for native mixed (serial and parallel) operation.
-- [x] Specify custom profiler DB path
-- [x] Protect against multiple profiling in mixed pipeline
-- [x] CI test for notebooks
-- [x] CI test using python 3.11
 
 ### v0.2.1
 
