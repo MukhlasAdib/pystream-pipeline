@@ -4,7 +4,8 @@ Basic Usage
 In general, PyStream provides a set of tools to build a data pipeline, especially the one that is targeted for low-latency and high-throughput application.
 The data pipeline here can include, for example, an IOT data processing, computer vision at edge, cloud data tabular data analytics, or any other that you can think of. 
 These tools will make it easier for you to manage your pipeline, without having to worry about operational stuffs like the data passing and the structure of the pipeline itself.
-One important feature that PyStream has provides is the ability to turn your pipeline operation into a parallel operation (through multithreading or multiprocessing).
+
+One important feature that PyStream has provided is the ability to turn your pipeline operation into a parallel operation (through multithreading or multiprocessing).
 Depends on the operations you have, you will be able to boost the speed and throughput of your data processing pipeline several times better than when you run it in step-by-step fashion.
 
 A PyStream **pipeline** is made of several **stages** that are linked together.  
@@ -24,15 +25,14 @@ To make the pipeline, in general you need to do the followings:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Stages are basically a bundle of data processing operations that is packed together. 
-With PyStream, a stage can be in form of a class instance or a function:
+With PyStream, a stage can be in form of a class instance or a function
 
 If you made it as a class instance you need to make the class inherit from ``pystream.Stage`` abstract class.
 For now, the methods that need to be defined are ``__call__`` and ``cleanup``.
-You can also set the ``name`` property of the class to set the registered name for the stage.
 See the API documentation to check what methods and interface need to be defined when inherit from it.
 The advantage of using ``pystream.Stage`` is that the ``cleanup`` method will be invoked during pipeline cleanup.
 
-If you want to make it as a function or class that does not inheris ``pystream.Stage``, then you only need to make a callable that only takes one argument, which is the data to be processed.
+If you want to make it as a function or class that does not inherit ``pystream.Stage``, then you only need to make a callable that only takes one argument, which is the data to be processed.
 The function also has to return one value, which is the resulted data.
 
 For example, we have a dummy data processing stage that only waits for 0.1 second and increment the integer input data by 1.
@@ -80,16 +80,20 @@ Then, let's add some stages by using ``add`` method with an optional ``name`` ar
 3. Choose operation mode
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To turn the pipeline into serial mode, you only need to invoke ``pipeline.serialize()``.
+To turn the pipeline into serial mode, you only need to invoke ``serialize`` method.
 In serial mode, the stage input data will be passed to the stage 1, and then to stage 2, and lastly to stage 3.
 The next data will be passed to stage 1 after stage 3 has been finished.
-Thus, in this mode, there is only one data that can be processed and one stage that will be executed at a time.
+Thus, in this mode, there is only one data that can be processed and one stage that will be executed at a time::
 
-To turn the pipeline into parallel mode, you need to invoke ``pipeline.parallelize()``.
+    pipeline.serialize()
+
+To turn the pipeline into parallel mode, you need to invoke ``parallelize`` method.
 In parallel mode, each stage live in a separate thread/process.
 The input data will be passed to stage 1 first and then to stage 2, and lastly to stage 3, just like the serial mode.
 But in parallel mode, when a stage is done processing, that stage can accept another data immediately, without having to wait the final stage finishing its job.
-Therefore, multiple data can be processed and multiple stages can be executed at the same time.
+Therefore, multiple data can be processed and multiple stages can be executed at the same time::
+
+    pipeline.parallelize()
 
 4. Run the pipeline
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
