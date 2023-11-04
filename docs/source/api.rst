@@ -10,7 +10,7 @@ Staged Pipeline
 
 
 .. autoclass:: pystream.Stage
-    :members: __call__, cleanup
+    :members: __call__, cleanup, name
 
 
 Functional Pipeline
