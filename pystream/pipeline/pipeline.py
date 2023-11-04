@@ -195,7 +195,7 @@ class Pipeline:
 
         Returns:
             Tuple[Dict[str, float], Dict[str, float]]: dictionary of the latency (in
-            seconds) and throughput (in data.second) data respectively. The data is a
+            seconds) and throughput (in data/second) data respectively. The data is a
             dict where the key is the stage name.
         """
         if self.profiler is None:
