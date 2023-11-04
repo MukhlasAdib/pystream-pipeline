@@ -23,8 +23,8 @@ Functions
 Constants
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autoattribute:: pystream.logger
-    :annotation: = PyStream logger object
+.. autodata:: pystream.logger
+    :annotation:
 
-.. autoattribute:: pystream.MAIN_PIPELINE_NAME
-    :annotation: = the main pipeline name in profiling results
+.. autodata:: pystream.MAIN_PIPELINE_NAME
+    :annotation:
