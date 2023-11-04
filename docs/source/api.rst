@@ -1,6 +1,8 @@
 PyStream API
 ======================================
 
+This page describes important components' API in PyStream.
+
 Classes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
