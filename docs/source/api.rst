@@ -1,9 +1,10 @@
 PyStream API
 ======================================
 
-Staged Pipeline
---------------------------------------
+This page describes important components' API in PyStream.
 
+Classes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: pystream.Pipeline
     :members:
@@ -12,12 +13,16 @@ Staged Pipeline
 .. autoclass:: pystream.Stage
     :members: __call__, cleanup
 
+Functions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Functional Pipeline
---------------------------------------
+.. autofunction:: pystream.get_profiler_db_folder
 
+.. autofunction:: pystream.set_profiler_db_folder
 
-.. autofunction:: pystream.functional.func_serial
+Constants
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. autodata:: pystream.logger
 
-.. autofunction:: pystream.functional.func_parallel_thread
+.. autodata:: pystream.MAIN_PIPELINE_NAME

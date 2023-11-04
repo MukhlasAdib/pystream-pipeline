@@ -1,27 +1,20 @@
-Usage of PyStream
+Basic Usage
 ======================================
 
 In general, PyStream provides a set of tools to build a data pipeline, especially the one that is targeted for low-latency and high-throughput application.
 The data pipeline here can include, for example, an IOT data processing, computer vision at edge, cloud data tabular data analytics, or any other that you can think of. 
 These tools will make it easier for you to manage your pipeline, without having to worry about operational stuffs like the data passing and the structure of the pipeline itself.
-One important feature that PyStream has provides is the ability to turn your pipeline operation into a parallel operation (through multithreading or multiprocessing).
+
+One important feature that PyStream has provided is the ability to turn your pipeline operation into a parallel operation (through multithreading or multiprocessing).
 Depends on the operations you have, you will be able to boost the speed and throughput of your data processing pipeline several times better than when you run it in step-by-step fashion.
 
 A PyStream **pipeline** is made of several **stages** that are linked together.  
-Based on how the stages are operated, PyStream's pipeline is categorized into two types: **staged** and **functional**.
-In staged pipeline, the stages are persistent and can be operated autonomously, i.e., it can continuously process data. 
-It is also structured in such a way to increase its performance. 
-This is the standard mode of building pipeline with PyStream. 
-Whereas in functional pipeline, the pipeline is stored as a function and you need to invoke it to make it process your data.
-This mode is intended for intermittent operations or as a sub-pipeline that can be operated inside staged pipeline.
-
-You can directly check the `demo script <https://github.com/MukhlasAdib/pystream-pipeline/blob/main/demo.ipynb>`_ of PyStream to see how this package is used.
+The stages are persistent and can be operated autonomously, i.e., it can continuously process data. 
+It is also structured in such a way to increase its performance.
+You can directly check the `demo notebook <https://github.com/MukhlasAdib/pystream-pipeline/blob/main/demo.ipynb>`_ of PyStream to see how this package is used.
 Please visit the `API documentation <https://pystream-pipeline.readthedocs.io/en/latest/api.html>`_ for more detailed information.
 
-Staged Pipeline
---------------------------------------
-
-For staged pipeline, you need to use the following classes:
+To create a pipeline you need to use the following classes:
 
 - Class ``pystream.Pipeline`` is used to construct the pipeline and the interface for you to operate it.
 - Class ``pystream.Stage`` is used as the abstract class for your stages, if they are made in form of Python classes.
@@ -32,18 +25,15 @@ To make the pipeline, in general you need to do the followings:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Stages are basically a bundle of data processing operations that is packed together. 
-With PyStream, a stage can be in form of a class instance or a function:
+With PyStream, a stage can be in form of a class instance or a function
 
 If you made it as a class instance you need to make the class inherit from ``pystream.Stage`` abstract class.
 For now, the methods that need to be defined are ``__call__`` and ``cleanup``.
-You can also set the ``name`` property of the class to set the registered name for the stage.
 See the API documentation to check what methods and interface need to be defined when inherit from it.
+The advantage of using ``pystream.Stage`` is that the ``cleanup`` method will be invoked during pipeline cleanup.
 
-If you want to make it as a function then you only need to make a callable that only takes one argument, which is the data to be processed.
+If you want to make it as a function or class that does not inherit ``pystream.Stage``, then you only need to make a callable that only takes one argument, which is the data to be processed.
 The function also has to return one value, which is the resulted data.
-
-You can use class instance as a stage without having to inherit from ``pystream.Stage``, by defining its ``__call__`` method.
-However the main advantage when inherit from ``pystream.Stage`` the pipeline will invoke its ``cleanup`` method when the pipeline is in cleanup step.
 
 For example, we have a dummy data processing stage that only waits for 0.1 second and increment the integer input data by 1.
 In the class form, it will be something like this::
@@ -61,7 +51,7 @@ In the class form, it will be something like this::
         def cleanup(self) -> None:
             print("Stage is clean!")
  
-Note that it will print out "Stage is clean!" when you invoke ``cleanup`` method of your pipeline (explained later).
+Note that it will print out "Stage is clean!" when you invoke ``cleanup`` method of your pipeline.
 In functional form, you can just use ``DummyStage()`` as your callable function, or you can make it a function like::
 
     def dummy_stage(data: int) -> int:
@@ -90,16 +80,20 @@ Then, let's add some stages by using ``add`` method with an optional ``name`` ar
 3. Choose operation mode
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To turn the pipeline into serial mode, you only need to invoke ``pipeline.serialize()``.
+To turn the pipeline into serial mode, you only need to invoke ``serialize`` method.
 In serial mode, the stage input data will be passed to the stage 1, and then to stage 2, and lastly to stage 3.
 The next data will be passed to stage 1 after stage 3 has been finished.
-Thus, in this mode, there is only one data that can be processed and one stage that will be executed at a time.
+Thus, in this mode, there is only one data that can be processed and one stage that will be executed at a time::
 
-To turn the pipeline into parallel mode, you need to invoke ``pipeline.parallelize()``.
+    pipeline.serialize()
+
+To turn the pipeline into parallel mode, you need to invoke ``parallelize`` method.
 In parallel mode, each stage live in a separate thread/process.
 The input data will be passed to stage 1 first and then to stage 2, and lastly to stage 3, just like the serial mode.
 But in parallel mode, when a stage is done processing, that stage can accept another data immediately, without having to wait the final stage finishing its job.
-Therefore, multiple data can be processed and multiple stages can be executed at the same time.
+Therefore, multiple data can be processed and multiple stages can be executed at the same time::
+
+    pipeline.parallelize()
 
 4. Run the pipeline
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -135,66 +129,3 @@ On the other hand, we provide a built-in pipeline profiler that can measure your
 The profiler can be activated by specifying ``use_profiler`` to True when instantiating ``pystream.Pipeline``.
 To get the pipeline profiles, use ``get_profiles`` method of ``pystream.Pipeline``.
 For examples, please check ``demo.ipynb``.
-
-Functional Pipeline
---------------------------------------
-
-Using functional pipeline is simple.
-You only need to define the stage callables and pass it to the functional pipeline tools that PyStream has.
-It is important to note that the passed functions only take one data argument.
-If you want to pass more external data, you can use persistent data type and embed it into your function partially.
-
-For example, to get the same pipeline as the previous example, the function will be as follow::
-
-    wait_time = 1
-    def dummy_stage(data):
-        time.sleep(wait_time)
-        print(data["data"])
-        data["data"] += 1
-        return data
-
-To make a serial pipeline, you can use ``pystream.functional.func_serial``::
-
-    pipeline_serial = pystream.functional.func_serial(
-        [
-            dummy_stage, 
-            dummy_stage, 
-            dummy_stage,
-        ]
-    )
-
-The serial functional pipeline is the same as the serial staged pipeline.
-
-To make a parallel one with threading strategy, just use ``pystream.functional.func_parallel_thread``::
-
-    pipeline_parallel = pystream.functional.func_parallel_thread(
-        [
-            dummy_stage, 
-            dummy_stage, 
-            dummy_stage,
-        ]
-    )
-
-The parallel that we are talking about here is different with parallel in staged mode.
-Here, all stage functions will be executed at the same time, with the same starting data state.
-If you call the pipeline, you will possibly get the numbers in a random order.
-
-You can also combine them::
-
-    pipeline_combined = pystream.functional.func_serial(
-        [
-            pipeline_parallel, 
-            pipeline_serial,
-        ]
-    )
-
-In the pipeline above, the data will go through the 3 stages in ``pipeline_parallel`` first, processed at the same time in parallel.
-Then, after the 3 stages finished, it will go through the stage 1 of ``pipeline_serial``, then to stage 2, and then to stage 3 of it. 
-When it has been finished, you will get that ``data["data"]`` is now ``6``.
-
-To run the pipeline, just call the pipeline function::
-
-    data = {"data": 0}
-    ret = pipeline_combined(data)
-
-and you will get the final modified `data` in `ret`.

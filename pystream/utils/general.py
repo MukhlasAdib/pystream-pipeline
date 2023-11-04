@@ -16,7 +16,8 @@ def set_profiler_db_folder(folder_path: str) -> None:
     This should be called before the Pipeline instantiation
 
     Args:
-        folder_path (str): path to the folder
+        folder_path (str): path to directory that contains
+            the database
     """
     global _PROFILER_DB_FOLDER
     _PROFILER_DB_FOLDER = folder_path
@@ -26,6 +27,6 @@ def get_profiler_db_folder() -> str:
     """Get the folder for the profiler SQLite database
 
     Returns:
-        str: the DB folder
+        str: path to directory that contains the database
     """
     return _PROFILER_DB_FOLDER

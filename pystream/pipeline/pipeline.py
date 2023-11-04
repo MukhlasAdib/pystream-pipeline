@@ -194,9 +194,9 @@ class Pipeline:
         """Get profiles data
 
         Returns:
-            Tuple[Dict[str, float], Dict[str, float]]: dictionary of the latency and
-            throughput data respectively. The data is a dict where the key is the
-            stage name
+            Tuple[Dict[str, float], Dict[str, float]]: dictionary of the latency (in
+            seconds) and throughput (in data/second) data respectively. The data is a
+            dict where the key is the stage name.
         """
         if self.profiler is None:
             LOGGER.error("Cannot get profiles because profiler is not activated")
