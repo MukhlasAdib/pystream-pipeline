@@ -19,6 +19,7 @@ Pages
    :maxdepth: 2
    
    usage
+   advanced
    api
 
 
