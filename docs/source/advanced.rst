@@ -12,12 +12,12 @@ To create pipeline with active profiler, you only need to specify ``use_profiler
 
     pipeline = pystream.Pipeline(input_generator=lambda: 0, use_profiler=True)
 
-And then you can get the profiling results by invoke ``get_profiles`` method of the pipeline.
+And then you can get the profiling results by invoking ``get_profiles`` method of the pipeline.
 The method will return the recorded throughput and latency of the pipeline as python dictionary::
 
     latency, throughput = pipeline.get_profiles()
 
-Here is a sample results of latency (dictionary)::
+Here is a sample result of latency::
 
     {
         'MainPipeline': 2.0981452222222226,
@@ -30,5 +30,38 @@ Here is a sample results of latency (dictionary)::
 
 Each item's key represents a stage/pipeline whereas the value represents the latency in seconds.
 Double underscores ``__`` is used as the saparator between sub-pipeline levels (useful in mixed pipeline).
-The overall pipeline data is always named as ``MainPipeline``.
+The overall pipeline data are always named as ``MainPipeline``.
 The throughput has the same format as latency, but the values are presented in data/second format. 
+
+2. Mixed Pipeline
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can also create pipeline inside another pipeline.
+This feature is useful  if you want to:
+
+- Groups your stages into several sub-pipelines
+- Mix serial and parallel pipelines, e.g., create serial pipeline inside parallel pipeline.
+
+In order to do that, you need to convert the sub-pipeline into a stage, which is easy.
+Use ``as_stage`` method of ``pystream.Pipeline`` to get the stage-form of the pipeline.
+Here is an example::
+
+    # create serial sub-pipeline
+    sub_pipeline = pystream.Pipeline()
+    # add normal stages
+    sub_pipeline.add(stage31)
+    sub_pipeline.add(stage32)
+    # serialize
+    sub_pipeline.serialize()
+
+    # create parallel main pipeline
+    main_pipeline = pystream.Pipeline(use_profiler=True)
+    # add normal stages
+    main_pipeline.add(stage1)
+    main_pipeline.add(stage2)
+    # add sub-pipeline as stage
+    main_pipeline.add(sub_pipeline.as_stage())
+    # parallelize
+    main_pipeline.parallelize()
+
+
